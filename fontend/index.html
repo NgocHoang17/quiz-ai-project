@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizAI - Tạo Quiz tự động</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; line-height: 1.6; }
+        textarea { width: 95%; height: 200px; margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; }
+        button:hover { background-color: #0056b3; }
+        #loading { display: none; color: blue; }
+        
+        /* CSS cho phần hiển thị kết quả quiz */
+        #quiz-result { margin-top: 20px; }
+        .quiz-question {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .quiz-question h4 { margin-top: 0; }
+        .quiz-question ul { list-style-type: none; padding-left: 0; }
+        .quiz-question li { margin-bottom: 5px; }
+        .correct-answer { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>QuizAI - Tạo Quiz từ văn bản</h1>
+    <p>Dán văn bản của bạn vào ô bên dưới và nhấn nút để tạo quiz.</p>
+
+    <textarea id="text-input" placeholder="Dán văn bản của bạn vào đây..."></textarea>
+    <button id="generate-button">Tạo Quiz</button>
+
+    <p id="loading">Đang xử lý, vui lòng chờ...</p>
+    
+    <h3>Kết quả:</h3>
+    <div id="quiz-result"></div>
+
+    <script>
+        const textInput = document.getElementById('text-input');
+        const generateButton = document.getElementById('generate-button');
+        const loadingMessage = document.getElementById('loading');
+        const quizResultDiv = document.getElementById('quiz-result');
+
+        generateButton.addEventListener('click', function() {
+            const text = textInput.value;
+            if (!text) {
+                alert('Vui lòng nhập văn bản!');
+                return;
+            }
+
+            loadingMessage.style.display = 'block';
+            quizResultDiv.innerHTML = ''; // Xóa kết quả cũ
+
+            fetch('http://127.0.0.1:8000/generate-quiz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingMessage.style.display = 'none';
+
+                if (data.error) {
+                    quizResultDiv.innerHTML = `<p style="color: red;">Lỗi: ${data.error}</p>`;
+                } else {
+                    // === PHẦN SỬA LỖI CHÍNH ===
+                    // Kiểm tra xem data.quiz_data có phải là object/array hay không
+                    if (typeof data.quiz_data === 'object' && data.quiz_data !== null) {
+                        // Nếu đúng, dùng nó trực tiếp để "vẽ" quiz
+                        displayQuiz(data.quiz_data);
+                    } else {
+                        // Nếu backend vì lý do nào đó trả về chuỗi (ví dụ AI trả về lỗi)
+                        quizResultDiv.innerHTML = `<p style="color: red;">Lỗi: AI trả về định dạng không mong muốn.</p><p>Dữ liệu thô: ${data.quiz_data}</p>`;
+                    }
+                }
+            })
+            .catch(error => {
+                loadingMessage.style.display = 'none';
+                console.error('Lỗi nghiêm trọng:', error);
+                quizResultDiv.innerHTML = '<p style="color: red;">Lỗi nghiêm trọng! Không thể kết nối đến server.</p>';
+            });
+        });
+
+        // Hàm này dùng để "vẽ" mảng quiz ra HTML
+        function displayQuiz(quizArray) {
+            quizResultDiv.innerHTML = '';
+
+            // Lặp qua từng câu hỏi (item) trong mảng
+            quizArray.forEach((questionItem, index) => {
+                
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'quiz-question';
+
+                const questionTitle = document.createElement('h4');
+                questionTitle.innerText = `Câu ${index + 1}: ${questionItem.cau_hoi}`;
+                questionDiv.appendChild(questionTitle);
+
+                const choicesList = document.createElement('ul');
+                
+                // Lặp qua các lựa chọn (A, B, C, D)
+                for (const key in questionItem.lua_chon) {
+                    const choiceItem = document.createElement('li');
+                    choiceItem.innerText = `${key}: ${questionItem.lua_chon[key]}`;
+                    
+                    // Tô màu đáp án đúng
+                    if (key === questionItem.dap_an) {
+                        choiceItem.className = 'correct-answer';
+                    }
+                    
+                    choicesList.appendChild(choiceItem);
+                }
+                
+                questionDiv.appendChild(choicesList);
+                quizResultDiv.appendChild(questionDiv);
+            });
+        }
+    </script>
+</body>
+</html>
