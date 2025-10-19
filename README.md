@@ -6,4 +6,4 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 deactivate
 
 //
-uvicorn main:app --reload
+uvicorn backend.main:app --reload

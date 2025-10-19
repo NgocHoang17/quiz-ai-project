@@ -1,0 +1,35 @@
+/* CSS chung */
+body {
+    background-color: #f8f9fa; /* Màu nền xám nhạt */
+}
+
+/* CSS cho thanh Navbar */
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* CSS cho phần hiển thị kết quả quiz (giữ nguyên) */
+.quiz-question {
+    background-color: #fdfdfd;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+.quiz-question h4 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+.quiz-question ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+.quiz-question li {
+    margin-bottom: 5px;
+}
+.correct-answer {
+    color: #198754; /* Màu xanh lá của Bootstrap */
+    font-weight: bold;
+}

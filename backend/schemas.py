@@ -1,8 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field # Import thêm Field
 from typing import List, Optional
-from datetime import datetime # Import datetime
+from datetime import datetime
 
-# --- Schemas cho Question (Mới) ---
+# --- Schemas cho Question (Giữ nguyên) ---
 class QuestionBase(BaseModel):
     question_text: str
     choice_a: str
@@ -12,51 +12,47 @@ class QuestionBase(BaseModel):
     correct_answer: str
 
 class QuestionCreate(QuestionBase):
-    pass # Khi tạo thì dùng y hệt Base
+    pass
 
 class QuestionOut(QuestionBase):
     id: int
     quiz_id: int
-    
     class Config:
-        orm_mode = True # Cho phép Pydantic đọc từ object SQLAlchemy
+        from_attributes = True # Đã sửa từ 'orm_mode'
 
-# --- Schemas cho Quiz (Mới) ---
+# --- Schemas cho Quiz (Giữ nguyên) ---
 class QuizBase(BaseModel):
     title: Optional[str] = "Bộ quiz mới"
 
 class QuizCreate(QuizBase):
-    # Khi tạo quiz, chúng ta cũng tạo luôn các câu hỏi
-    # questions sẽ là một danh sách các câu hỏi
     questions: List[QuestionCreate]
 
 class QuizOut(QuizBase):
     id: int
     owner_id: int
-    created_at: datetime # Giữ kiểu datetime
-    questions: List[QuestionOut] = [] # Trả về danh sách các câu hỏi
-
+    created_at: datetime
+    questions: List[QuestionOut] = []
     class Config:
-        orm_mode = True
+        from_attributes = True # Đã sửa từ 'orm_mode'
 
 # --- Schemas cho User (Cập nhật) ---
 class UserCreate(BaseModel):
     email: str
-    password: str
+    # === CẬP NHẬT: Thêm validation cho mật khẩu ===
+    password: str = Field(..., min_length=6, max_length=72)
+    # ==========================================
 
-class UserLogin(BaseModel): # Schema mới cho /login
+class UserLogin(BaseModel):
     email: str
     password: str
 
 class UserOut(BaseModel):
     id: int
     email: str
-    # quizzes: List[QuizOut] = [] # Có thể thêm dòng này nếu muốn trả về quiz của user
-
     class Config:
-        orm_mode = True
+        from_attributes = True # Đã sửa từ 'orm_mode'
 
-# --- Schemas cho Token (JWT) (Mới) ---
+# --- Schemas cho Token (JWT) (Giữ nguyên) ---
 class Token(BaseModel):
     access_token: str
     token_type: str

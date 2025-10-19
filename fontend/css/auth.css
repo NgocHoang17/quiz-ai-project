@@ -1,0 +1,59 @@
+html,
+body {
+  height: 100%;
+}
+
+.auth-card {
+  max-width: 400px;
+  padding: 1.5rem;
+  margin: auto;
+}
+
+.auth-card .form-floating:focus-within {
+  z-index: 2;
+}
+
+#login-form input[type="email"],
+#register-form input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+#login-form input[type="password"],
+#register-form input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.auth-message {
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+/* === CSS MỚI CHO THÔNG BÁO === */
+.text-danger {
+    color: #dc3545; /* Màu đỏ */
+}
+
+.text-success {
+    color: #198754; /* Màu xanh lá */
+}
+/* ============================= */
+
+.switch-page {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.switch-page a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.switch-page a:hover {
+    text-decoration: underline;
+}
