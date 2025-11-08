@@ -117,8 +117,8 @@ def generate_quiz(request: QuizRequest):
         return {"error": "Vui lòng nhập nội dung văn bản."}
 
     try:
-        # === SỬA LỖI 2: Sửa 'GenerModel' thành 'GenerativeModel' ===
-        model = genai.GenerativeModel("gemini-2.5-flash") # Dùng model của bạn
+        # Model AI 
+        model = genai.GenerativeModel("gemini-2.5-flash") 
         # =======================================================
         
         prompt = f"""

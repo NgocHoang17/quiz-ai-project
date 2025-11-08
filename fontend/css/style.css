@@ -33,3 +33,19 @@ body {
     color: #198754; /* Màu xanh lá của Bootstrap */
     font-weight: bold;
 }
+
+/* === THÊM CSS MỚI CHO THÔNG BÁO LƯU QUIZ === */
+#save-quiz-message {
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+.text-success {
+    color: #198754; /* Màu xanh lá (Bootstrap) */
+}
+.text-danger {
+    color: #dc3545; /* Màu đỏ (Bootstrap) */
+}
+.text-primary {
+    color: #0d6efd; /* Màu xanh dương (Bootstrap) */
+}
