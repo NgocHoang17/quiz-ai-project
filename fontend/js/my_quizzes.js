@@ -80,13 +80,13 @@ async function fetchUserQuizzes(token) {
 // === HÀM "VẼ" MỘT QUIZ ITEM (Đã cập nhật) ===
 function createQuizElement(quiz, index) {
     const quizItem = document.createElement('div');
-    // Thêm ID cho thẻ div để dễ dàng xóa/cập nhật tên
     quizItem.id = `quiz-item-${quiz.id}`; 
     quizItem.className = 'list-group-item list-group-item-action flex-column align-items-start';
 
     const timeAgo = formatTimeAgo(quiz.created_at);
 
-    // Cập nhật các nút bấm để gọi hàm JS với "index"
+    // === CẬP NHẬT LẠI NÚT BẤM ===
+    // Đã thêm lại nút "Làm bài"
     quizItem.innerHTML = `
         <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1 quiz-title">${escapeHTML(quiz.title)}</h5>
@@ -94,14 +94,16 @@ function createQuizElement(quiz, index) {
         </div>
         <p class="mb-1">Bao gồm ${quiz.questions.length} câu hỏi.</p>
         
-        <button class="btn btn-primary btn-sm mt-2" onclick="viewQuiz(${index})">Xem</button>
+        <button class="btn btn-primary btn-sm mt-2" onclick="startQuiz(${quiz.id})">Làm bài</button>
+        <button class="btn btn-info btn-sm mt-2" onclick="viewQuiz(${index})">Xem</button>
         <button class="btn btn-warning btn-sm mt-2" onclick="editQuizTitle(${index})">Sửa tên</button>
         <button class="btn btn-outline-danger btn-sm mt-2" onclick="deleteQuiz(${index})">Xóa</button>
     `;
+    // =============================
     return quizItem;
 }
 
-// === CÁC HÀM TƯƠNG TÁC MỚI ===
+// === CÁC HÀM TƯƠNG TÁC ===
 
 // 1. HÀM XEM QUIZ (MỞ MODAL)
 function viewQuiz(index) {
@@ -109,11 +111,9 @@ function viewQuiz(index) {
     const modalTitle = document.getElementById('viewQuizModalLabel');
     const modalBody = document.getElementById('viewQuizModalBody');
 
-    // Cập nhật tên của modal
     modalTitle.innerText = `Nội dung: ${escapeHTML(quiz.title)}`;
     
-    // "Vẽ" các câu hỏi vào thân modal
-    modalBody.innerHTML = ''; // Xóa nội dung cũ
+    modalBody.innerHTML = ''; 
     quiz.questions.forEach((q, i) => {
         modalBody.innerHTML += `
             <div class="quiz-question">
@@ -128,7 +128,6 @@ function viewQuiz(index) {
         `;
     });
     
-    // Dùng API của Bootstrap để mở modal
     viewModal.show();
 }
 
@@ -137,14 +136,12 @@ async function editQuizTitle(index) {
     const quiz = userQuizzes[index];
     const token = localStorage.getItem('quizAIToken');
 
-    // 1. Hỏi tên mới
     const newTitle = prompt("Nhập tên mới cho bộ quiz:", quiz.title);
     
     if (!newTitle || newTitle === quiz.title) {
-        return; // Hủy nếu không nhập gì hoặc tên không đổi
+        return; 
     }
     
-    // 2. Gọi API để cập nhật
     try {
         const response = await fetch(`http://127.0.0.1:8000/quizzes/${quiz.id}`, {
             method: 'PUT',
@@ -152,14 +149,12 @@ async function editQuizTitle(index) {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ title: newTitle }) // Gửi tên mới
+            body: JSON.stringify({ title: newTitle }) 
         });
 
         if (response.ok) {
             const updatedQuiz = await response.json();
-            // Cập nhật lại dữ liệu trong mảng toàn cục
             userQuizzes[index] = updatedQuiz;
-            // Cập nhật tên trên giao diện (DOM)
             document.querySelector(`#quiz-item-${quiz.id} .quiz-title`).innerText = escapeHTML(updatedQuiz.title);
             alert("Đổi tên thành công!");
         } else {
@@ -175,12 +170,10 @@ async function deleteQuiz(index) {
     const quiz = userQuizzes[index];
     const token = localStorage.getItem('quizAIToken');
     
-    // 1. Xác nhận
     if (!confirm(`Bạn có chắc chắn muốn xóa bộ quiz "${escapeHTML(quiz.title)}"? Hành động này không thể hoàn tác.`)) {
-        return; // Hủy nếu người dùng không đồng ý
+        return;
     }
 
-    // 2. Gọi API để xóa
     try {
         const response = await fetch(`http://127.0.0.1:8000/quizzes/${quiz.id}`, {
             method: 'DELETE',
@@ -188,13 +181,10 @@ async function deleteQuiz(index) {
         });
 
         if (response.ok) {
-            // Xóa khỏi mảng toàn cục
             userQuizzes.splice(index, 1);
-            // Xóa khỏi giao diện (DOM)
             document.getElementById(`quiz-item-${quiz.id}`).remove();
             alert("Đã xóa quiz thành công!");
             
-            // Kiểm tra xem còn quiz nào không
             if (userQuizzes.length === 0) {
                  document.getElementById('quiz-list-container').innerHTML = '<p class="text-muted">Bạn chưa lưu bộ quiz nào.</p>';
             }
@@ -206,8 +196,15 @@ async function deleteQuiz(index) {
     }
 }
 
+// === 4. HÀM LÀM BÀI ===
+function startQuiz(quizId) {
+    // Chuyển hướng người dùng đến trang làm bài,
+    // đính kèm ID của quiz vào URL
+    window.location.href = `do_quiz.html?quiz_id=${quizId}`;
+}
+// ===================================
+
 // === CÁC HÀM TIỆN ÍCH (HELPER FUNCTIONS) ===
-// (Giữ nguyên 2 hàm: escapeHTML và formatTimeAgo)
 function escapeHTML(str) {
   return str.replace(/[&<>"']/g, function(m) {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];

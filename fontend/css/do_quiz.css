@@ -1,0 +1,53 @@
+/* CSS riêng cho trang làm bài */
+
+.quiz-container {
+    max-width: 700px;
+    margin: 20px auto;
+}
+
+#quiz-questions-wrapper {
+    /* (Sẽ dùng sau nếu bạn muốn ẩn/hiện) */
+}
+
+/* Kiểu cho các lựa chọn (radio button) */
+.quiz-choice-label {
+    display: block;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: .375rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.quiz-choice-label:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+/* Khi người dùng chọn (check) radio button */
+.quiz-choice-label input[type="radio"]:checked + span {
+    font-weight: bold;
+}
+
+/* Ẩn radio button gốc */
+.quiz-choice-label input[type="radio"] {
+    display: none;
+}
+
+/* Kiểu cho kết quả (sau khi chấm) */
+.correct {
+    background-color: #d1e7dd !important; /* Màu xanh lá */
+    border-color: #b1dfc8 !important;
+}
+
+.incorrect {
+    background-color: #f8d7da !important; /* Màu đỏ */
+    border-color: #f5c2c7 !important;
+}
+
+.correct-answer-text {
+    font-weight: bold;
+    color: #0a3622;
+}

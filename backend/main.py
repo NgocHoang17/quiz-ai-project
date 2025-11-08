@@ -200,7 +200,6 @@ def get_user_quizzes(
 
 # ===============================================
 
-# ... (Code cũ của bạn, ngay sau @app.get("/my-quizzes")) ...
 
 # === API MỚI: XÓA MỘT BỘ QUIZ ===
 @app.delete("/quizzes/{quiz_id}")
@@ -251,4 +250,23 @@ def update_quiz_title(
     db.commit()
     db.refresh(quiz)
     
+    return quiz
+
+
+# === API MỚI: LẤY CHI TIẾT MỘT BỘ QUIZ (CÔNG KHAI) ===
+@app.get("/quiz/{quiz_id}", response_model=schemas.QuizOut)
+def get_quiz_details(
+    quiz_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy chi tiết một bộ quiz (bao gồm các câu hỏi).
+    API này công khai, không cần đăng nhập,
+    để phục vụ cho tính năng "chia sẻ".
+    """
+    quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+    
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Không tìm thấy bộ quiz")
+        
     return quiz
