@@ -118,7 +118,7 @@ def generate_quiz(request: QuizRequest):
 
     try:
         # === SỬA LỖI 2: Sửa 'GenerModel' thành 'GenerativeModel' ===
-        model = genai.GenerativeModel("gemini-1.5-flash") # Dùng model của bạn
+        model = genai.GenerativeModel("gemini-2.5-flash") # Dùng model của bạn
         # =======================================================
         
         prompt = f"""
