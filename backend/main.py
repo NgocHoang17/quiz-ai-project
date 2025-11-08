@@ -1,11 +1,15 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from typing import List
-from datetime import timedelta # === SỬA LỖI 1: Import 'timedelta' ===
+from typing import List, Optional
+from datetime import timedelta
+import io # Import io để xử lý file bytes
+import fitz # Import PyMuPDF (fitz)
+import docx # === MỚI: Thư viện Word ===
+from pptx import Presentation # === MỚI: Thư viện PowerPoint ===
 
-# Import tất cả các file .py chúng ta vừa tạo/sửa
+# Import các file .py của bạn
 from . import models, schemas, security 
 from .database import engine, SessionLocal
 import google.generativeai as genai
@@ -15,11 +19,8 @@ import os
 import json
 
 # --- TẢI BIẾN MÔI TRƯỜNG & CẤU HÌNH AI ---
-
-# === SỬA LỖI 3: Chỉ đường dẫn file .env ở thư mục GỐC (cha) ===
 dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
 load_dotenv(dotenv_path=dotenv_path)
-# =======================================================
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
@@ -46,7 +47,6 @@ app.add_middleware(
 )
 
 # --- HÀM PHỤ THUỘC (DEPENDENCIES) ---
-
 def get_db():
     db = SessionLocal()
     try:
@@ -68,9 +68,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise credentials_exception
     return user
 
-
 # --- API XÁC THỰC (ĐĂNG KÝ & ĐĂNG NHẬP) ---
-
 @app.post("/register", response_model=schemas.UserOut)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(models.User.email == user.email).first()
@@ -96,7 +94,6 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # Dùng 'timedelta' đã import ở trên
     access_token_expires = timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
@@ -105,24 +102,16 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# --- API QUIZ (TẠO VÀ LƯU) ---
-
-class QuizRequest(BaseModel):
-    text: str
-
-@app.post("/generate-quiz") 
-def generate_quiz(request: QuizRequest):
-    input_text = request.text.strip()
-    if not input_text:
-        return {"error": "Vui lòng nhập nội dung văn bản."}
-
+# --- (TÁI CẤU TRÚC) HÀM LÕI AI ---
+def _generate_quiz_from_text(text: str):
+    """
+    Hàm lõi: Nhận văn bản, gọi AI và trả về (data, error).
+    """
     try:
-        # Model AI 
         model = genai.GenerativeModel("gemini-2.5-flash") 
-        # =======================================================
         
         prompt = f"""
-        Dựa vào đoạn văn bản sau: "{input_text}"
+        Dựa vào đoạn văn bản sau: "{text}"
         Hãy tạo 5 câu hỏi trắc nghiệm (A, B, C, D) và chỉ rõ đáp án đúng.
         Trả về CHUỖI JSON hợp lệ, KHÔNG thêm giải thích.
         Định dạng:
@@ -135,16 +124,91 @@ def generate_quiz(request: QuizRequest):
         
         try:
             quiz_data = json.loads(quiz_json_string)
-            return {"quiz_data": quiz_data}
+            return quiz_data, None # Trả về (data, không có lỗi)
         except json.JSONDecodeError:
-            return {"error": "AI trả về định dạng JSON không hợp lệ."}
+            return None, "AI trả về định dạng JSON không hợp lệ."
 
     except Exception as e:
         print(f"❌ Lỗi khi gọi Gemini API: {e}")
-        return {"error": f"Lỗi khi gọi Gemini API: {str(e)}"}
+        return None, f"Lỗi khi gọi Gemini API: {str(e)}"
+
+# --- API QUIZ (TẠO VÀ LƯU) ---
+
+class QuizRequest(BaseModel):
+    text: str
+
+@app.post("/generate-quiz") # API cũ (dùng cho dán văn bản)
+def generate_quiz_from_text(request: QuizRequest):
+    input_text = request.text.strip()
+    if not input_text:
+        return {"error": "Vui lòng nhập nội dung văn bản."}
+
+    quiz_data, error = _generate_quiz_from_text(input_text)
+    
+    if error:
+        return {"error": error}
+    return {"quiz_data": quiz_data}
+
+# === API MỚI: TẠO QUIZ TỪ FILE UPLOAD (ĐÃ CẬP NHẬT) ===
+@app.post("/upload-quiz-file")
+async def generate_quiz_from_file(file: UploadFile = File(...)):
+    if not file:
+        return {"error": "Vui lòng tải lên một file."}
+        
+    extracted_text = ""
+    file_bytes = await file.read() # Đọc file vào bộ nhớ
+    file_extension = os.path.splitext(file.filename)[1].lower() # Lấy đuôi file .pdf, .docx
+    
+    try:
+        # 1. Xử lý file .txt
+        if file_extension == ".txt":
+            extracted_text = file_bytes.decode("utf-8")
+        
+        # 2. Xử lý file .pdf
+        elif file_extension == ".pdf":
+            with fitz.open(stream=io.BytesIO(file_bytes), filetype="pdf") as doc:
+                for page in doc:
+                    extracted_text += page.get_text()
+        
+        # 3. === MỚI: Xử lý file .docx (Word) ===
+        elif file_extension == ".docx":
+            doc_stream = io.BytesIO(file_bytes)
+            doc = docx.Document(doc_stream)
+            all_text = [p.text for p in doc.paragraphs]
+            extracted_text = "\n".join(all_text)
+            
+        # 4. === MỚI: Xử lý file .pptx (PowerPoint) ===
+        elif file_extension == ".pptx":
+            ppt_stream = io.BytesIO(file_bytes)
+            prs = Presentation(ppt_stream)
+            all_text = []
+            for slide in prs.slides:
+                for shape in slide.shapes:
+                    if hasattr(shape, "text"):
+                        all_text.append(shape.text)
+            extracted_text = "\n".join(all_text)
+
+        else:
+            # === CẬP NHẬT: Thông báo lỗi ===
+            return {"error": "Định dạng file không được hỗ trợ. Chỉ chấp nhận .txt, .pdf, .docx, .pptx."}
+            
+    except Exception as e:
+        print(f"Lỗi khi đọc file {file.filename}: {e}")
+        return {"error": f"Không thể đọc file. Lỗi: {str(e)}"}
+
+    if not extracted_text.strip():
+        return {"error": "File không có nội dung hoặc không thể trích xuất văn bản."}
+    
+    # 5. Gọi hàm AI lõi
+    quiz_data, error = _generate_quiz_from_text(extracted_text)
+    
+    if error:
+        return {"error": error}
+    return {"quiz_data": quiz_data}
 
 
-# === API MỚI: LƯU QUIZ (YÊU CẦU ĐĂNG NHẬP) ===
+# --- API QUẢN LÝ QUIZ (LƯU, XEM, SỬA, XÓA) ---
+
 @app.post("/save-quiz", response_model=schemas.QuizOut)
 def save_quiz(
     quiz_to_save: schemas.QuizCreate, 
@@ -182,91 +246,52 @@ def save_quiz(
         print(f"Lỗi khi lưu quiz: {e}")
         raise HTTPException(status_code=500, detail=f"Lỗi máy chủ nội bộ: {e}")
 
-
-# === API MỚI: LẤY TẤT CẢ QUIZ CỦA NGƯỜI DÙNG ===
 @app.get("/my-quizzes", response_model=List[schemas.QuizOut])
 def get_user_quizzes(
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user) # Bắt buộc đăng nhập
+    current_user: models.User = Depends(get_current_user)
 ):
-    """
-    Trả về một danh sách tất cả các bộ quiz
-    thuộc về người dùng đang đăng nhập.
-    """
-    # Nhờ có "relationship" trong models.py,
-    # chúng ta chỉ cần gọi current_user.quizzes
-    # SQLAlchemy sẽ tự động làm phần còn lại.
     return current_user.quizzes
 
-# ===============================================
-
-
-# === API MỚI: XÓA MỘT BỘ QUIZ ===
 @app.delete("/quizzes/{quiz_id}")
 def delete_quiz(
     quiz_id: int,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    # 1. Tìm quiz trong database
     quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
-    
-    # 2. Kiểm tra
     if not quiz:
         raise HTTPException(status_code=404, detail="Không tìm thấy bộ quiz")
-    
-    # 3. Kiểm tra xem user này có phải là CHỦ của quiz không
     if quiz.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Không có quyền xóa bộ quiz này")
-    
-    # 4. Xóa
-    # (Nhờ có 'cascade' trong models.py, khi xóa quiz,
-    # tất cả 'questions' liên quan cũng tự động bị xóa)
     db.delete(quiz)
     db.commit()
-    
     return {"message": "Đã xóa quiz thành công"}
 
-# === API MỚI: SỬA TÊN BỘ QUIZ ===
-# Chúng ta dùng schema QuizBase vì nó chỉ có 'title'
 @app.put("/quizzes/{quiz_id}", response_model=schemas.QuizOut)
 def update_quiz_title(
     quiz_id: int,
-    quiz_update: schemas.QuizBase, # Nhận title mới từ body
+    quiz_update: schemas.QuizBase,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    # 1. Tìm quiz
     quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
-    
-    # 2. Kiểm tra
     if not quiz:
         raise HTTPException(status_code=404, detail="Không tìm thấy bộ quiz")
     if quiz.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Không có quyền sửa bộ quiz này")
-        
-    # 3. Cập nhật title
+    
     quiz.title = quiz_update.title
     db.commit()
     db.refresh(quiz)
-    
     return quiz
 
-
-# === API MỚI: LẤY CHI TIẾT MỘT BỘ QUIZ (CÔNG KHAI) ===
 @app.get("/quiz/{quiz_id}", response_model=schemas.QuizOut)
 def get_quiz_details(
     quiz_id: int,
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy chi tiết một bộ quiz (bao gồm các câu hỏi).
-    API này công khai, không cần đăng nhập,
-    để phục vụ cho tính năng "chia sẻ".
-    """
     quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
-    
     if not quiz:
         raise HTTPException(status_code=404, detail="Không tìm thấy bộ quiz")
-        
     return quiz

@@ -2,99 +2,140 @@
 let currentQuizData = null;
 
 // === PHẦN KIỂM TRA XÁC THỰC (AUTH GUARD) ===
-
-// Chạy ngay khi DOM tải xong
 document.addEventListener('DOMContentLoaded', function() {
+    // ... (Toàn bộ code Auth Guard và Logout giữ nguyên) ...
     const token = localStorage.getItem('quizAIToken');
     const email = localStorage.getItem('quizAIUserEmail');
 
-    // 1. KIỂM TRA TOKEN
     if (!token) {
-        // Nếu không có token, đẩy người dùng về trang đăng nhập
         window.location.href = 'login.html';
-        return; // Dừng thực thi code nếu chưa đăng nhập
+        return; 
     } else {
-        // Nếu có token, hiển thị thông tin chào mừng
         const welcomeMessage = document.getElementById('welcome-message');
         welcomeMessage.innerText = `Chào mừng, ${email}!`;
     }
 
-    // 2. GẮN SỰ KIỆN ĐĂNG XUẤT
     const logoutButton = document.getElementById('logout-button');
     logoutButton.addEventListener('click', function() {
-        // Xóa token khỏi bộ nhớ
         localStorage.removeItem('quizAIToken');
         localStorage.removeItem('quizAIUserEmail');
-        
-        // Đẩy người dùng về trang đăng nhập
         window.location.href = 'login.html';
     });
 });
 
+// === PHẦN XỬ LÝ TẠO QUIZ (ĐÃ CẬP NHẬT CHO TABS) ===
 
-// === PHẦN XỬ LÝ TẠO QUIZ ===
-
-// Lấy các phần tử HTML của quiz
-const textInput = document.getElementById('text-input');
+// Lấy các phần tử HTML
 const generateButton = document.getElementById('generate-button');
 const loadingMessage = document.getElementById('loading');
 const quizResultDiv = document.getElementById('quiz-result');
 const saveQuizButton = document.getElementById('save-quiz-button');
 const saveQuizMessage = document.getElementById('save-quiz-message');
 
+// Lấy các phần tử của Tab
+const textInput = document.getElementById('text-input');
+const fileInput = document.getElementById('file-input');
+const textTabButton = document.getElementById('text-tab');
+const fileTabButton = document.getElementById('file-tab');
+
 // Gắn sự kiện "click" cho nút Tạo Quiz
 generateButton.addEventListener('click', function() {
     
-    const text = textInput.value; 
-    if (!text) {
-        alert('Vui lòng nhập văn bản!');
-        return;
-    }
+    // 1. Kiểm tra xem tab nào đang active
+    const isTextTabActive = textTabButton.classList.contains('active');
+    
+    // 2. Đặt lại trạng thái
+    resetQuizState();
 
-    // Đặt lại trạng thái
+    if (isTextTabActive) {
+        // --- Logic cho Tab "Dán văn bản" ---
+        const text = textInput.value; 
+        if (!text) {
+            alert('Vui lòng nhập văn bản!');
+            return;
+        }
+        // Gọi API /generate-quiz
+        fetchQuizFromText(text);
+        
+    } else {
+        // --- Logic cho Tab "Tải file" ---
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('Vui lòng chọn một file!');
+            return;
+        }
+        // Gọi API /upload-quiz-file
+        fetchQuizFromFile(file);
+    }
+});
+
+// Hàm reset trạng thái
+function resetQuizState() {
     loadingMessage.style.display = 'block';
     quizResultDiv.innerHTML = '<p class="text-muted">Đang tạo quiz...</p>';
-    saveQuizButton.style.display = 'none'; // Ẩn nút lưu
+    saveQuizButton.style.display = 'none'; 
     saveQuizMessage.innerText = '';
-    currentQuizData = null; // Xóa quiz cũ
+    currentQuizData = null; 
+}
 
+// Hàm gọi API /generate-quiz (cho text)
+function fetchQuizFromText(text) {
     fetch('http://127.0.0.1:8000/generate-quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: text })
     })
     .then(response => response.json())
-    .then(data => {
-        loadingMessage.style.display = 'none'; 
+    .then(handleApiResponse) // Dùng hàm xử lý chung
+    .catch(handleApiError);
+}
 
-        if (data.error) {
-            quizResultDiv.innerHTML = `<p class="text-danger">Lỗi: ${data.error}</p>`;
-        } else {
-             if (typeof data.quiz_data === 'object' && data.quiz_data !== null) {
-                // ✅ THÀNH CÔNG: Lưu quiz vào biến toàn cục
-                currentQuizData = data.quiz_data;
-                // Hiển thị quiz
-                displayQuiz(currentQuizData);
-                // Hiển thị nút "Lưu Quiz"
-                saveQuizButton.style.display = 'block';
-            } else {
-                quizResultDiv.innerHTML = `<p class="text-danger">Lỗi: AI trả về định dạng không mong muốn.</p>`;
-            }
-        }
+// Hàm gọi API /upload-quiz-file (cho file)
+function fetchQuizFromFile(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    fetch('http://127.0.0.1:8000/upload-quiz-file', {
+        method: 'POST',
+        // KHÔNG set 'Content-Type', trình duyệt sẽ tự làm
+        body: formData 
     })
-    .catch(error => {
-        loadingMessage.style.display = 'none'; 
-        console.error('Lỗi nghiêm trọng:', error);
-        quizResultDiv.innerHTML = '<p class="text-danger">Lỗi nghiêm trọng! Không thể kết nối đến server.</p>';
-    });
-});
+    .then(response => response.json())
+    .then(handleApiResponse) // Dùng hàm xử lý chung
+    .catch(handleApiError);
+}
 
-// Hàm "vẽ" quiz ra HTML
+// --- Các hàm xử lý kết quả (Dùng chung) ---
+
+function handleApiResponse(data) {
+    loadingMessage.style.display = 'none'; 
+
+    if (data.error) {
+        quizResultDiv.innerHTML = `<p class="text-danger">Lỗi: ${data.error}</p>`;
+    } else {
+         if (typeof data.quiz_data === 'object' && data.quiz_data !== null) {
+            currentQuizData = data.quiz_data;
+            displayQuiz(currentQuizData);
+            saveQuizButton.style.display = 'block';
+        } else {
+            quizResultDiv.innerHTML = `<p class="text-danger">Lỗi: AI trả về định dạng không mong muốn.</p>`;
+        }
+    }
+}
+
+function handleApiError(error) {
+    loadingMessage.style.display = 'none'; 
+    console.error('Lỗi nghiêm trọng:', error);
+    quizResultDiv.innerHTML = '<p class="text-danger">Lỗi nghiêm trọng! Không thể kết nối đến server.</p>';
+}
+
+// Hàm "vẽ" quiz ra HTML (Giữ nguyên)
 function displayQuiz(quizArray) {
     quizResultDiv.innerHTML = '';
     quizArray.forEach((questionItem, index) => {
         const questionDiv = document.createElement('div');
         questionDiv.className = 'quiz-question';
+        // (code bên trong giữ nguyên)
         const questionTitle = document.createElement('h4');
         questionTitle.innerText = `Câu ${index + 1}: ${questionItem.cau_hoi}`;
         questionDiv.appendChild(questionTitle);
@@ -113,29 +154,23 @@ function displayQuiz(quizArray) {
 }
 
 
-// === PHẦN MỚI: XỬ LÝ LƯU QUIZ (ĐÃ CẬP NHẬT XỬ LÝ LỖI 401) ===
-
+// === PHẦN XỬ LÝ LƯU QUIZ ===
+// (Toàn bộ code cho saveQuizButton.addEventListener('click', ...) giữ nguyên)
 saveQuizButton.addEventListener('click', async function() {
     if (!currentQuizData) {
         alert("Không có dữ liệu quiz để lưu!");
         return;
     }
-    
-    // 1. Lấy token
     const token = localStorage.getItem('quizAIToken');
     if (!token) {
-        alert("Không tìm thấy token. Vui lòng đăng nhập lại.");
+        alert("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
         window.location.href = 'login.html';
         return;
     }
-
-    // 2. Hỏi người dùng tên của bộ quiz
     const quizTitle = prompt("Nhập tên cho bộ quiz này:", "Quiz mới");
-    if (!quizTitle) { // Nếu người dùng nhấn "Cancel"
+    if (!quizTitle) { 
         return;
     }
-
-    // 3. Chuẩn bị dữ liệu để gửi lên (theo schema QuizCreate)
     const dataToSave = {
         title: quizTitle,
         questions: currentQuizData.map(q => ({
@@ -147,49 +182,34 @@ saveQuizButton.addEventListener('click', async function() {
             correct_answer: q.dap_an
         }))
     };
-    
-    // 4. Gửi yêu cầu đến API /save-quiz
     saveQuizMessage.innerText = 'Đang lưu...';
     saveQuizMessage.className = 'text-primary';
-
     try {
         const response = await fetch('http://127.0.0.1:8000/save-quiz', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                // Gửi token trong header Authorization
                 'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(dataToSave)
         });
-
-        // === PHẦN CẬP NHẬT LỖI 401 ===
-        if (response.ok) { // Nếu server trả về 2xx (thành công)
+        if (response.ok) { 
             const savedQuiz = await response.json();
             saveQuizMessage.innerText = `✅ Đã lưu thành công bộ quiz: "${savedQuiz.title}"`;
             saveQuizMessage.className = 'text-success';
             saveQuizButton.style.display = 'none';
-
         } else if (response.status === 401) {
-            // LỖI 401 (Hết hạn token hoặc token không hợp lệ)
             saveQuizMessage.innerText = '❌ Lỗi: Phiên đăng nhập đã hết hạn. Vui lòng đăng xuất và đăng nhập lại!';
             saveQuizMessage.className = 'text-danger';
-            // Báo cho người dùng biết
             alert("Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại.");
-            // Xóa token hỏng
             localStorage.removeItem('quizAIToken');
             localStorage.removeItem('quizAIUserEmail');
-            // Đẩy về trang login
             window.location.href = 'login.html';
-            
         } else {
-            // Lỗi khác (ví dụ 500, 400...)
             const errorData = await response.json();
             saveQuizMessage.innerText = `❌ Lỗi khi lưu: ${errorData.detail || 'Lỗi không xác định'}`;
             saveQuizMessage.className = 'text-danger';
         }
-        // =============================
-
     } catch (err) {
         console.error("Lỗi khi lưu quiz:", err);
         saveQuizMessage.innerText = '❌ Lỗi kết nối. Không thể lưu quiz.';

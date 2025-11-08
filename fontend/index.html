@@ -18,15 +18,14 @@
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">Tạo Quiz mới</a>
+                        <a class="nav-link active" href="index.html">Tạo Quiz mới</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="my_quizzes.html">Quiz của tôi</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center">
-                    <span class="navbar-text me-3" id="welcome-message">
-                        </span>
+                    <span class="navbar-text me-3" id="welcome-message"></span>
                     <button class="btn btn-outline-danger" id="logout-button">Đăng xuất</button>
                 </div>
             </div>
@@ -39,11 +38,30 @@
             <div class="col-lg-6">
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <h2 class="h4 card-title">Tạo Quiz từ văn bản</h2>
-                        <p class="card-text">Dán văn bản của bạn vào ô bên dưới và nhấn nút để tạo quiz.</p>
                         
-                        <textarea class="form-control" id="text-input" rows="10" placeholder="Dán văn bản của bạn vào đây..."></textarea>
-                        
+                        <ul class="nav nav-tabs" id="createQuizTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-tab-pane" type="button" role="tab" aria-controls="text-tab-pane" aria-selected="true">Dán văn bản</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="file-tab" data-bs-toggle="tab" data-bs-target="#file-tab-pane" type="button" role="tab" aria-controls="file-tab-pane" aria-selected="false">Tải file lên (.txt, .pdf, .docx, .pptx)</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="createQuizTabContent">
+                            
+                            <div class="tab-pane fade show active p-3" id="text-tab-pane" role="tabpanel" aria-labelledby="text-tab" tabindex="0">
+                                <h2 class="h4 card-title">Tạo Quiz từ văn bản</h2>
+                                <p class="card-text">Dán văn bản của bạn vào ô bên dưới.</p>
+                                <textarea class="form-control" id="text-input" rows="10" placeholder="Dán văn bản của bạn vào đây..."></textarea>
+                            </div>
+                            
+                            <div class="tab-pane fade p-3" id="file-tab-pane" role="tabpanel" aria-labelledby="file-tab" tabindex="0">
+                                <h2 class="h4 card-title">Tạo Quiz từ File</h2>
+                                <p class="card-text">Chọn một file .txt, .pdf, .docx hoặc .pptx để tải lên.</p>
+                                <input class="form-control" type="file" id="file-input" accept=".txt,.pdf,.docx,.pptx">
+                            </div>
+
+                        </div>
                         <button class="btn btn-primary w-100 mt-3" id="generate-button">
                             Tạo Quiz
                         </button>
