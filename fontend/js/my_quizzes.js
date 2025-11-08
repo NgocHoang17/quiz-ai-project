@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return; 
     }
     
-    // Khởi tạo đối tượng Modal của Bootstrap
     viewModal = new bootstrap.Modal(document.getElementById('viewQuizModal'));
     
     const welcomeMessage = document.getElementById('welcome-message');
@@ -26,7 +25,6 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = 'login.html';
     });
     
-    // Tải danh sách quiz
     fetchUserQuizzes(token);
 });
 
@@ -44,9 +42,8 @@ async function fetchUserQuizzes(token) {
         if (response.ok) {
             const quizzes = await response.json();
             loadingP.style.display = 'none';
-            quizListContainer.innerHTML = ''; // Xóa trắng container
+            quizListContainer.innerHTML = ''; 
             
-            // Lưu vào biến toàn cục
             userQuizzes = quizzes; 
             
             if (userQuizzes.length === 0) {
@@ -54,7 +51,6 @@ async function fetchUserQuizzes(token) {
                 return;
             }
             
-            // "Vẽ" từng quiz ra, truyền vào "index" của mảng
             userQuizzes.forEach((quiz, index) => {
                 const quizItem = createQuizElement(quiz, index);
                 quizListContainer.appendChild(quizItem);
@@ -77,7 +73,7 @@ async function fetchUserQuizzes(token) {
     }
 }
 
-// === HÀM "VẼ" MỘT QUIZ ITEM (Đã cập nhật) ===
+// === HÀM "VẼ" MỘT QUIZ ITEM ===
 function createQuizElement(quiz, index) {
     const quizItem = document.createElement('div');
     quizItem.id = `quiz-item-${quiz.id}`; 
@@ -85,8 +81,6 @@ function createQuizElement(quiz, index) {
 
     const timeAgo = formatTimeAgo(quiz.created_at);
 
-    // === CẬP NHẬT LẠI NÚT BẤM ===
-    // Đã thêm lại nút "Làm bài"
     quizItem.innerHTML = `
         <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1 quiz-title">${escapeHTML(quiz.title)}</h5>
@@ -95,11 +89,11 @@ function createQuizElement(quiz, index) {
         <p class="mb-1">Bao gồm ${quiz.questions.length} câu hỏi.</p>
         
         <button class="btn btn-primary btn-sm mt-2" onclick="startQuiz(${quiz.id})">Làm bài</button>
+        <button class="btn btn-success btn-sm mt-2" onclick="shareQuiz(${quiz.id})">Chia sẻ</button>
         <button class="btn btn-info btn-sm mt-2" onclick="viewQuiz(${index})">Xem</button>
         <button class="btn btn-warning btn-sm mt-2" onclick="editQuizTitle(${index})">Sửa tên</button>
         <button class="btn btn-outline-danger btn-sm mt-2" onclick="deleteQuiz(${index})">Xóa</button>
     `;
-    // =============================
     return quizItem;
 }
 
@@ -196,13 +190,30 @@ async function deleteQuiz(index) {
     }
 }
 
-// === 4. HÀM LÀM BÀI ===
+// 4. HÀM LÀM BÀI
 function startQuiz(quizId) {
-    // Chuyển hướng người dùng đến trang làm bài,
-    // đính kèm ID của quiz vào URL
     window.location.href = `do_quiz.html?quiz_id=${quizId}`;
 }
-// ===================================
+
+// === 5. HÀM CHIA SẺ QUIZ (ĐÃ SỬA LỖI) ===
+function shareQuiz(quizId) {
+    // === SỬA LỖI: Bỏ phần 'origin' và '/frontend/' ===
+    // Tạo đường dẫn tương đối. Trình duyệt sẽ tự động
+    // tìm file 'do_quiz.html' trong CÙNG thư mục với 'my_quizzes.html'
+    const shareUrl = `do_quiz.html?quiz_id=${quizId}`;
+    // ===========================================
+    
+    // Lấy đường dẫn đầy đủ (tuyệt đối) mà trình duyệt đã phân giải
+    const fullShareUrl = new URL(shareUrl, window.location.href).href;
+
+    try {
+        navigator.clipboard.writeText(fullShareUrl);
+        alert(`Đã sao chép link chia sẻ vào clipboard:\n\n${fullShareUrl}`);
+    } catch (err) {
+        console.error('Không thể sao chép: ', err);
+        prompt("Không thể tự động sao chép. Vui lòng sao chép link này:", fullShareUrl);
+    }
+}
 
 // === CÁC HÀM TIỆN ÍCH (HELPER FUNCTIONS) ===
 function escapeHTML(str) {

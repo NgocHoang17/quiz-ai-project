@@ -1,14 +1,72 @@
 /* CSS chung */
-body {
+body { 
     background-color: #f8f9fa; /* Màu nền xám nhạt */
 }
+textarea { 
+    width: 95%; 
+    height: 200px; 
+    margin-bottom: 10px; 
+    padding: 10px; 
+    border: 1px solid #ccc; 
+    border-radius: 5px; 
+}
+/* Đảm bảo các nút Bootstrap có màu chuẩn */
+button, .btn { 
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    cursor: pointer; 
+    border-radius: .375rem; 
+    border: 1px solid transparent;
+}
+.btn-primary { background-color: #0d6efd; color: white; border-color: #0d6efd; }
+.btn-primary:hover { background-color: #0b5ed7; border-color: #0a58ca; }
+.btn-success { background-color: #198754; color: white; border-color: #198754; }
+.btn-success:hover { background-color: #157347; border-color: #146c43; }
+.btn-info { background-color: #0dcaf0; color: black; border-color: #0dcaf0; }
+.btn-info:hover { background-color: #31d2f2; border-color: #25cff2; }
+.btn-warning { background-color: #ffc107; color: black; border-color: #ffc107; }
+.btn-warning:hover { background-color: #ffca2c; border-color: #ffc720; }
+.btn-danger { background-color: #dc3545; color: white; border-color: #dc3545; }
+.btn-danger:hover { background-color: #bb2d3b; border-color: #b02a37; }
+.btn-outline-danger { color: #dc3545; border-color: #dc3545; background-color: transparent; }
+.btn-outline-danger:hover { background-color: #dc3545; color: white; }
+.btn-sm { padding: .25rem .5rem; font-size: .875rem; border-radius: .25rem; }
+.mt-2 { margin-top: .5rem !important; }
 
 /* CSS cho thanh Navbar */
 .navbar-brand {
     font-weight: bold;
 }
 
-/* CSS cho phần hiển thị kết quả quiz (giữ nguyên) */
+/* CSS cho thanh User (trang index) */
+.user-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+.user-container span {
+    font-weight: bold;
+}
+
+/* CSS cho kết quả quiz (trang index) */
+#loading { 
+    display: none; 
+    color: #0d6efd; /* Màu xanh dương */
+}
+#save-quiz-message {
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+.text-success { color: #198754; }
+.text-danger { color: #dc3545; }
+.text-primary { color: #0d6efd; }
+
+/* CSS chung cho .quiz-question (dùng ở index và my_quizzes modal) */
 .quiz-question {
     background-color: #fdfdfd;
     border: 1px solid #ddd;
@@ -30,38 +88,20 @@ body {
     margin-bottom: 5px;
 }
 .correct-answer {
-    color: #198754; /* Màu xanh lá của Bootstrap */
+    color: #198754; 
     font-weight: bold;
 }
 
-/* === THÊM CSS MỚI CHO THÔNG BÁO LƯU QUIZ === */
-#save-quiz-message {
-    text-align: center;
-    font-weight: bold;
-    font-size: 0.95rem;
-}
-.text-success {
-    color: #198754; /* Màu xanh lá (Bootstrap) */
-}
-.text-danger {
-    color: #dc3545; /* Màu đỏ (Bootstrap) */
-}
-.text-primary {
-    color: #0d6efd; /* Màu xanh dương (Bootstrap) */
-}
-
-/* === CSS MỚI CHO TRANG "MY QUIZZES" === */
+/* CSS MỚI CHO TRANG "MY QUIZZES" */
 .list-group-item h5 {
-    color: #0d6efd; /* Màu xanh dương */
+    color: #0d6efd; 
 }
-
 .list-group-item button {
-    margin-right: 5px; /* Khoảng cách giữa 2 nút Làm bài / Xóa */
+    margin-right: 5px; 
 }
 
-/* === CSS MỚI CHO MODAL XEM QUIZ === */
+/* CSS CHO MODAL XEM QUIZ */
 #viewQuizModalBody .quiz-question {
-    /* Tái sử dụng style .quiz-question chúng ta đã viết */
     border: 1px dashed #ccc;
     background-color: #fdfdfd;
 }
