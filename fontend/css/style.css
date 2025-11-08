@@ -49,3 +49,19 @@ body {
 .text-primary {
     color: #0d6efd; /* Màu xanh dương (Bootstrap) */
 }
+
+/* === CSS MỚI CHO TRANG "MY QUIZZES" === */
+.list-group-item h5 {
+    color: #0d6efd; /* Màu xanh dương */
+}
+
+.list-group-item button {
+    margin-right: 5px; /* Khoảng cách giữa 2 nút Làm bài / Xóa */
+}
+
+/* === CSS MỚI CHO MODAL XEM QUIZ === */
+#viewQuizModalBody .quiz-question {
+    /* Tái sử dụng style .quiz-question chúng ta đã viết */
+    border: 1px dashed #ccc;
+    background-color: #fdfdfd;
+}

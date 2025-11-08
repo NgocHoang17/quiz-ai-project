@@ -181,3 +181,74 @@ def save_quiz(
         db.rollback() 
         print(f"Lỗi khi lưu quiz: {e}")
         raise HTTPException(status_code=500, detail=f"Lỗi máy chủ nội bộ: {e}")
+
+
+# === API MỚI: LẤY TẤT CẢ QUIZ CỦA NGƯỜI DÙNG ===
+@app.get("/my-quizzes", response_model=List[schemas.QuizOut])
+def get_user_quizzes(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user) # Bắt buộc đăng nhập
+):
+    """
+    Trả về một danh sách tất cả các bộ quiz
+    thuộc về người dùng đang đăng nhập.
+    """
+    # Nhờ có "relationship" trong models.py,
+    # chúng ta chỉ cần gọi current_user.quizzes
+    # SQLAlchemy sẽ tự động làm phần còn lại.
+    return current_user.quizzes
+
+# ===============================================
+
+# ... (Code cũ của bạn, ngay sau @app.get("/my-quizzes")) ...
+
+# === API MỚI: XÓA MỘT BỘ QUIZ ===
+@app.delete("/quizzes/{quiz_id}")
+def delete_quiz(
+    quiz_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    # 1. Tìm quiz trong database
+    quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+    
+    # 2. Kiểm tra
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Không tìm thấy bộ quiz")
+    
+    # 3. Kiểm tra xem user này có phải là CHỦ của quiz không
+    if quiz.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Không có quyền xóa bộ quiz này")
+    
+    # 4. Xóa
+    # (Nhờ có 'cascade' trong models.py, khi xóa quiz,
+    # tất cả 'questions' liên quan cũng tự động bị xóa)
+    db.delete(quiz)
+    db.commit()
+    
+    return {"message": "Đã xóa quiz thành công"}
+
+# === API MỚI: SỬA TÊN BỘ QUIZ ===
+# Chúng ta dùng schema QuizBase vì nó chỉ có 'title'
+@app.put("/quizzes/{quiz_id}", response_model=schemas.QuizOut)
+def update_quiz_title(
+    quiz_id: int,
+    quiz_update: schemas.QuizBase, # Nhận title mới từ body
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    # 1. Tìm quiz
+    quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+    
+    # 2. Kiểm tra
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Không tìm thấy bộ quiz")
+    if quiz.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Không có quyền sửa bộ quiz này")
+        
+    # 3. Cập nhật title
+    quiz.title = quiz_update.title
+    db.commit()
+    db.refresh(quiz)
+    
+    return quiz
