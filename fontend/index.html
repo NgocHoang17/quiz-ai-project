@@ -48,19 +48,35 @@
                             </li>
                         </ul>
                         <div class="tab-content" id="createQuizTabContent">
-                            
                             <div class="tab-pane fade show active p-3" id="text-tab-pane" role="tabpanel" aria-labelledby="text-tab" tabindex="0">
                                 <h2 class="h4 card-title">Tạo Quiz từ văn bản</h2>
                                 <p class="card-text">Dán văn bản của bạn vào ô bên dưới.</p>
                                 <textarea class="form-control" id="text-input" rows="10" placeholder="Dán văn bản của bạn vào đây..."></textarea>
                             </div>
-                            
                             <div class="tab-pane fade p-3" id="file-tab-pane" role="tabpanel" aria-labelledby="file-tab" tabindex="0">
                                 <h2 class="h4 card-title">Tạo Quiz từ File</h2>
                                 <p class="card-text">Chọn một file .txt, .pdf, .docx hoặc .pptx để tải lên.</p>
                                 <input class="form-control" type="file" id="file-input" accept=".txt,.pdf,.docx,.pptx">
                             </div>
-
+                        </div>
+                        <div class="row g-2 mt-3 px-3">
+                            <div class="col-md">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="quiz-count" value="5" min="1" max="25">
+                                    <label for="quiz-count">Số lượng (1-25)</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-floating">
+                                    <select class="form-select" id="quiz-type">
+                                        <option value="mcq" selected>Trắc nghiệm (4 lựa chọn)</option>
+                                        <option value="fill_in_blank">Điền khuyết</option>
+                                        <option value="exercise">Bài tập</option>
+                                        <option value="mixed">Hỗn hợp (Tất cả)</option>
+                                    </select>
+                                    <label for="quiz-type">Loại câu hỏi</label>
+                                </div>
+                            </div>
                         </div>
                         <button class="btn btn-primary w-100 mt-3" id="generate-button">
                             Tạo Quiz
@@ -77,20 +93,20 @@
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h2 class="h4 card-title">Kết quả</h2>
-                        
                         <button class="btn btn-success w-100 mb-3" id="save-quiz-button" style="display: none;">
                             Lưu Quiz này
                         </button>
                         <p id="save-quiz-message"></p>
-
                         <div id="quiz-result">
                             <p class="text-muted">Kết quả quiz sẽ xuất hiện ở đây...</p>
                         </div>
                     </div>
                 </div>
             </div>
+        </div> 
+    </main> 
 
-        </div> </main> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js" defer></script>
 </body>
 </html>

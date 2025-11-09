@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile
+from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -13,7 +13,7 @@ from pptx import Presentation # === MỚI: Thư viện PowerPoint ===
 from . import models, schemas, security 
 from .database import engine, SessionLocal
 import google.generativeai as genai
-from pydantic import BaseModel
+from pydantic import BaseModel, Field # ✅ Import thêm Field
 from dotenv import load_dotenv
 import os
 import json
@@ -102,21 +102,60 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# --- (TÁI CẤU TRÚC) HÀM LÕI AI ---
-def _generate_quiz_from_text(text: str):
+# --- (TÁI CẤU TRÚC) HÀM LÕI AI (ĐÃ CẬP NHẬT PROMPT) ---
+def _generate_quiz_from_text(text: str, num_questions: int, quiz_type: str):
     """
-    Hàm lõi: Nhận văn bản, gọi AI và trả về (data, error).
+    Hàm lõi: Nhận văn bản và tùy chọn, gọi AI và trả về (data, error).
     """
+    
+    # "Dịch" các tùy chọn sang hướng dẫn cho AI
+    quiz_type_instructions = {
+        "mcq": "Trắc nghiệm 4 lựa chọn (A, B, C, D).",
+        "fill_in_blank": "Trắc nghiệm dạng điền vào chỗ trống. Câu hỏi phải có một dấu ba chấm '...' hoặc '____' để điền.",
+        "exercise": "Câu hỏi dạng bài tập vận dụng hoặc giải quyết vấn đề dựa trên nội dung.",
+        "mixed": "Hỗn hợp nhiều dạng câu hỏi (trắc nghiệm, điền khuyết, bài tập)."
+    }
+    
+    # Lấy hướng dẫn, nếu không tìm thấy thì dùng mcq làm mặc định
+    instruction = quiz_type_instructions.get(quiz_type, quiz_type_instructions["mcq"])
+
     try:
         model = genai.GenerativeModel("gemini-2.5-flash") 
         
+        #  PROMPT ĐÃ ĐƯỢC NÂNG CẤP 
         prompt = f"""
-        Dựa vào đoạn văn bản sau: "{text}"
-        Hãy tạo 5 câu hỏi trắc nghiệm (A, B, C, D) và chỉ rõ đáp án đúng.
-        Trả về CHUỖI JSON hợp lệ, KHÔNG thêm giải thích.
-        Định dạng:
+        Dựa vào đoạn văn bản sau đây:
+        "{text}"
+
+        Hãy thực hiện 2 yêu cầu sau:
+        1. Yêu cầu số lượng: Tạo chính xác {num_questions} câu hỏi.
+        2. Yêu cầu loại câu hỏi: {instruction}
+
+        QUY TẮC ĐỊNH DẠNG:
+        - Trả về CHUỖI JSON hợp lệ, KHÔNG thêm văn bản giải thích nào bên ngoài.
+        - MỖI câu hỏi phải có 4 lựa chọn (A, B, C, D) và 1 đáp án đúng (dù là dạng điền khuyết hay bài tập).
+        - Định dạng JSON phải là một danh sách (list) các đối tượng:
         [
-          {{"cau_hoi": "?", "lua_chon": {{"A": "...", "B": "...", "C": "...", "D": "..."}}, "dap_an": "A"}}
+          {{
+            "cau_hoi": "Câu hỏi 1 ...?",
+            "lua_chon": {{
+              "A": "Lựa chọn A",
+              "B": "Lựa chọn B",
+              "C": "Lựa chọn C",
+              "D": "Lựa chọn D"
+            }},
+            "dap_an": "A"
+          }},
+          {{
+            "cau_hoi": "Câu hỏi 2 ...?",
+            "lua_chon": {{
+              "A": "Lựa chọn A",
+              "B": "Lựa chọn B",
+              "C": "Lựa chọn C",
+              "D": "Lựa chọn D"
+            }},
+            "dap_an": "B"
+          }}
         ]
         """
         response = model.generate_content(prompt)
@@ -124,8 +163,9 @@ def _generate_quiz_from_text(text: str):
         
         try:
             quiz_data = json.loads(quiz_json_string)
-            return quiz_data, None # Trả về (data, không có lỗi)
+            return quiz_data, None 
         except json.JSONDecodeError:
+            print(f"DEBUG: AI trả về JSON không hợp lệ: {quiz_json_string}")
             return None, "AI trả về định dạng JSON không hợp lệ."
 
     except Exception as e:
@@ -134,24 +174,34 @@ def _generate_quiz_from_text(text: str):
 
 # --- API QUIZ (TẠO VÀ LƯU) ---
 
+# Cập nhật Schema: Thêm 2 trường mới
 class QuizRequest(BaseModel):
     text: str
+    num_questions: int = Field(5, gt=0, le=25) # Mặc định là 5, giới hạn 1-25
+    quiz_type: str = "mcq" # Mặc định là trắc nghiệm
 
-@app.post("/generate-quiz") # API cũ (dùng cho dán văn bản)
+@app.post("/generate-quiz") 
 def generate_quiz_from_text(request: QuizRequest):
     input_text = request.text.strip()
     if not input_text:
         return {"error": "Vui lòng nhập nội dung văn bản."}
 
-    quiz_data, error = _generate_quiz_from_text(input_text)
+    # ✅ Gửi thêm 2 tham số mới
+    quiz_data, error = _generate_quiz_from_text(
+        request.text, request.num_questions, request.quiz_type
+    )
     
     if error:
         return {"error": error}
     return {"quiz_data": quiz_data}
 
-# === API MỚI: TẠO QUIZ TỪ FILE UPLOAD (ĐÃ CẬP NHẬT) ===
+# ✅ Cập nhật API: Thêm 2 tham số mới từ Form
 @app.post("/upload-quiz-file")
-async def generate_quiz_from_file(file: UploadFile = File(...)):
+async def generate_quiz_from_file(
+    file: UploadFile = File(...),
+    num_questions: int = Form(5), # Nhận từ Form, mặc định là 5
+    quiz_type: str = Form("mcq") # Nhận từ Form, mặc định là "mcq"
+):
     if not file:
         return {"error": "Vui lòng tải lên một file."}
         
@@ -200,7 +250,9 @@ async def generate_quiz_from_file(file: UploadFile = File(...)):
         return {"error": "File không có nội dung hoặc không thể trích xuất văn bản."}
     
     # 5. Gọi hàm AI lõi
-    quiz_data, error = _generate_quiz_from_text(extracted_text)
+    quiz_data, error = _generate_quiz_from_text(
+        extracted_text, num_questions, quiz_type
+    )
     
     if error:
         return {"error": error}

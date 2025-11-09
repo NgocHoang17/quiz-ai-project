@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// === PHẦN XỬ LÝ TẠO QUIZ (ĐÃ CẬP NHẬT CHO TABS) ===
+// === PHẦN XỬ LÝ TẠO QUIZ (ĐÃ CẬP NHẬT) ===
 
 // Lấy các phần tử HTML
 const generateButton = document.getElementById('generate-button');
@@ -38,13 +38,27 @@ const fileInput = document.getElementById('file-input');
 const textTabButton = document.getElementById('text-tab');
 const fileTabButton = document.getElementById('file-tab');
 
+// ✅✅✅ LẤY CÁC PHẦN TỬ TÙY CHỌN MỚI ✅✅✅
+const quizCountInput = document.getElementById('quiz-count');
+const quizTypeSelect = document.getElementById('quiz-type');
+
 // Gắn sự kiện "click" cho nút Tạo Quiz
 generateButton.addEventListener('click', function() {
     
-    // 1. Kiểm tra xem tab nào đang active
+    // 1. Lấy các tùy chọn mới
+    const numQuestions = parseInt(quizCountInput.value);
+    const quizType = quizTypeSelect.value;
+    
+    // 2. Kiểm tra tùy chọn
+    if (isNaN(numQuestions) || numQuestions < 1 || numQuestions > 25) {
+        alert("Vui lòng nhập số lượng câu hỏi hợp lệ (từ 1 đến 25).");
+        return;
+    }
+
+    // 3. Kiểm tra xem tab nào đang active
     const isTextTabActive = textTabButton.classList.contains('active');
     
-    // 2. Đặt lại trạng thái
+    // 4. Đặt lại trạng thái
     resetQuizState();
 
     if (isTextTabActive) {
@@ -54,8 +68,8 @@ generateButton.addEventListener('click', function() {
             alert('Vui lòng nhập văn bản!');
             return;
         }
-        // Gọi API /generate-quiz
-        fetchQuizFromText(text);
+        // Gọi API /generate-quiz (đã thêm tùy chọn)
+        fetchQuizFromText(text, numQuestions, quizType);
         
     } else {
         // --- Logic cho Tab "Tải file" ---
@@ -64,12 +78,12 @@ generateButton.addEventListener('click', function() {
             alert('Vui lòng chọn một file!');
             return;
         }
-        // Gọi API /upload-quiz-file
-        fetchQuizFromFile(file);
+        // Gọi API /upload-quiz-file (đã thêm tùy chọn)
+        fetchQuizFromFile(file, numQuestions, quizType);
     }
 });
 
-// Hàm reset trạng thái
+// Hàm reset trạng thái (giữ nguyên)
 function resetQuizState() {
     loadingMessage.style.display = 'block';
     quizResultDiv.innerHTML = '<p class="text-muted">Đang tạo quiz...</p>';
@@ -78,12 +92,19 @@ function resetQuizState() {
     currentQuizData = null; 
 }
 
+// === CẬP NHẬT CÁC HÀM FETCH ===
+
 // Hàm gọi API /generate-quiz (cho text)
-function fetchQuizFromText(text) {
+function fetchQuizFromText(text, numQuestions, quizType) {
     fetch('http://127.0.0.1:8000/generate-quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text })
+        // ✅ Gửi thêm tùy chọn trong body
+        body: JSON.stringify({ 
+            text: text, 
+            num_questions: numQuestions, 
+            quiz_type: quizType 
+        })
     })
     .then(response => response.json())
     .then(handleApiResponse) // Dùng hàm xử lý chung
@@ -91,13 +112,15 @@ function fetchQuizFromText(text) {
 }
 
 // Hàm gọi API /upload-quiz-file (cho file)
-function fetchQuizFromFile(file) {
+function fetchQuizFromFile(file, numQuestions, quizType) {
     const formData = new FormData();
     formData.append('file', file);
+    // ✅ Gửi thêm tùy chọn dưới dạng Form Data
+    formData.append('num_questions', numQuestions);
+    formData.append('quiz_type', quizType);
     
     fetch('http://127.0.0.1:8000/upload-quiz-file', {
         method: 'POST',
-        // KHÔNG set 'Content-Type', trình duyệt sẽ tự làm
         body: formData 
     })
     .then(response => response.json())
@@ -105,11 +128,9 @@ function fetchQuizFromFile(file) {
     .catch(handleApiError);
 }
 
-// --- Các hàm xử lý kết quả (Dùng chung) ---
-
+// --- Các hàm xử lý kết quả (Dùng chung) (Giữ nguyên) ---
 function handleApiResponse(data) {
     loadingMessage.style.display = 'none'; 
-
     if (data.error) {
         quizResultDiv.innerHTML = `<p class="text-danger">Lỗi: ${data.error}</p>`;
     } else {
@@ -122,7 +143,6 @@ function handleApiResponse(data) {
         }
     }
 }
-
 function handleApiError(error) {
     loadingMessage.style.display = 'none'; 
     console.error('Lỗi nghiêm trọng:', error);
@@ -131,11 +151,11 @@ function handleApiError(error) {
 
 // Hàm "vẽ" quiz ra HTML (Giữ nguyên)
 function displayQuiz(quizArray) {
+    // ... (Code giữ nguyên) ...
     quizResultDiv.innerHTML = '';
     quizArray.forEach((questionItem, index) => {
         const questionDiv = document.createElement('div');
         questionDiv.className = 'quiz-question';
-        // (code bên trong giữ nguyên)
         const questionTitle = document.createElement('h4');
         questionTitle.innerText = `Câu ${index + 1}: ${questionItem.cau_hoi}`;
         questionDiv.appendChild(questionTitle);
@@ -153,10 +173,9 @@ function displayQuiz(quizArray) {
     });
 }
 
-
-// === PHẦN XỬ LÝ LƯU QUIZ ===
-// (Toàn bộ code cho saveQuizButton.addEventListener('click', ...) giữ nguyên)
+// === PHẦN XỬ LÝ LƯU QUIZ (Giữ nguyên) ===
 saveQuizButton.addEventListener('click', async function() {
+    // ... (Toàn bộ code Lưu Quiz giữ nguyên) ...
     if (!currentQuizData) {
         alert("Không có dữ liệu quiz để lưu!");
         return;
