@@ -61,6 +61,31 @@
         </div>
     </div>
 
+    <div class="modal fade" id="startQuizOptionsModal" tabindex="-1" aria-labelledby="startQuizModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="startQuizModalLabel">Tùy chọn làm bài</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Chọn các tùy chọn cho lần làm bài này:</p>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" role="switch" id="modal-shuffle-questions">
+                        <label class="form-check-label" for="modal-shuffle-questions">Trộn thứ tự câu hỏi</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="modal-shuffle-choices">
+                        <label class="form-check-label" for="modal-shuffle-choices">Trộn thứ tự đáp án</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="start-quiz-button">Bắt đầu!</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/my_quizzes.js" defer></script>
 </body>

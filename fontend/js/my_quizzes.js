@@ -1,7 +1,8 @@
-// Biến toàn cục để lưu danh sách quiz, giúp modal truy cập dễ dàng
+// Biến toàn cục
 let userQuizzes = [];
-// Biến toàn cục để giữ đối tượng Modal của Bootstrap
 let viewModal = null;
+let startQuizModal = null; // Biến mới cho Modal Tùy chọn
+let quizIdToStart = null; // Biến mới để lưu quizId
 
 // === PHẦN KIỂM TRA XÁC THỰC (AUTH GUARD) ===
 document.addEventListener('DOMContentLoaded', function() {
@@ -13,7 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return; 
     }
     
+    // Khởi tạo cả 2 Modal
     viewModal = new bootstrap.Modal(document.getElementById('viewQuizModal'));
+    startQuizModal = new bootstrap.Modal(document.getElementById('startQuizOptionsModal')); // Khởi tạo Modal mới
     
     const welcomeMessage = document.getElementById('welcome-message');
     welcomeMessage.innerText = `Chào mừng, ${email}!`;
@@ -26,6 +29,22 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     fetchUserQuizzes(token);
+
+    // Lập trình cho nút "Bắt đầu" TRONG MODAL
+    document.getElementById('start-quiz-button').addEventListener('click', function() {
+        // 1. Lấy các tùy chọn
+        const shuffleQuestions = document.getElementById('modal-shuffle-questions').checked;
+        const shuffleChoices = document.getElementById('modal-shuffle-choices').checked;
+
+        // 2. Lấy quizId đã lưu
+        if (quizIdToStart === null) return;
+
+        // 3. Tạo URL mới với các tùy chọn
+        const url = `do_quiz.html?quiz_id=${quizIdToStart}&shuffle_q=${shuffleQuestions}&shuffle_c=${shuffleChoices}`;
+        
+        // 4. Chuyển trang
+        window.location.href = url;
+    });
 });
 
 // === HÀM TẢI VÀ HIỂN THỊ QUIZ ===
@@ -190,22 +209,19 @@ async function deleteQuiz(index) {
     }
 }
 
-// 4. HÀM LÀM BÀI
+// === 4. HÀM LÀM BÀI (ĐÃ CẬP NHẬT) ===
 function startQuiz(quizId) {
-    window.location.href = `do_quiz.html?quiz_id=${quizId}`;
+    // 1. Lưu ID quiz vào biến toàn cục
+    quizIdToStart = quizId;
+    
+    // 2. Mở Modal tùy chọn
+    startQuizModal.show();
 }
 
-// === 5. HÀM CHIA SẺ QUIZ (ĐÃ SỬA LỖI) ===
+// 5. HÀM CHIA SẺ QUIZ
 function shareQuiz(quizId) {
-    // === SỬA LỖI: Bỏ phần 'origin' và '/frontend/' ===
-    // Tạo đường dẫn tương đối. Trình duyệt sẽ tự động
-    // tìm file 'do_quiz.html' trong CÙNG thư mục với 'my_quizzes.html'
     const shareUrl = `do_quiz.html?quiz_id=${quizId}`;
-    // ===========================================
-    
-    // Lấy đường dẫn đầy đủ (tuyệt đối) mà trình duyệt đã phân giải
     const fullShareUrl = new URL(shareUrl, window.location.href).href;
-
     try {
         navigator.clipboard.writeText(fullShareUrl);
         alert(`Đã sao chép link chia sẻ vào clipboard:\n\n${fullShareUrl}`);
@@ -217,6 +233,7 @@ function shareQuiz(quizId) {
 
 // === CÁC HÀM TIỆN ÍCH (HELPER FUNCTIONS) ===
 function escapeHTML(str) {
+  if (typeof str !== 'string') return '';
   return str.replace(/[&<>"']/g, function(m) {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
   });

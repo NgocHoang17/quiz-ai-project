@@ -106,8 +106,8 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
 def _generate_quiz_from_text(text: str, num_questions: int, quiz_type: str):
     quiz_type_instructions = {
         "mcq": "Trắc nghiệm 4 lựa chọn (A, B, C, D).",
-        "fill_in_blank": "Trắc nghiệm dạng điền vào chỗ trống. Câu hỏi phải có một dấu ba chấm '...' hoặc '____' để điền.",
-        "exercise": "Câu hỏi dạng bài tập vận dụng hoặc giải quyết vấn đề dựa trên nội dung.",
+        "fill_in_blank": "Trắc nghiệm dạng điền vào chỗ trống. Câu hỏi phải có một đến hai dấu '____' ở các vị trí quan trong trong câu trích dẫn để điền.",
+        "exercise": "Câu hỏi dạng bài tập vận dụng hoặc giải quyết vấn đề dựa trên nội dung.(không cung cấp kí hiệu cho công thức và không giải thích dài dòng)",
         "mixed": "Hỗn hợp nhiều dạng câu hỏi (trắc nghiệm, điền khuyết, bài tập)."
     }
     instruction = quiz_type_instructions.get(quiz_type, quiz_type_instructions["mcq"])

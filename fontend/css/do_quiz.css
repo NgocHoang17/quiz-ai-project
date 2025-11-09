@@ -5,10 +5,6 @@
     margin: 20px auto;
 }
 
-#quiz-questions-wrapper {
-    /* (Sẽ dùng sau nếu bạn muốn ẩn/hiện) */
-}
-
 /* Kiểu cho các lựa chọn (radio button) */
 .quiz-choice-label {
     display: block;
@@ -52,9 +48,10 @@
     color: #0a3622;
 }
 
-/* === CSS MỚI CHO CỜ ĐỎ === */
+/* Cờ đỏ (câu hay sai) */
 .red-flag {
     color: red;
     font-size: 1.2rem;
     cursor: help; /* Hiển thị icon '?' khi hover */
 }
+

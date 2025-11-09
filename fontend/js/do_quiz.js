@@ -3,7 +3,10 @@ let allQuestions = [];
 let userAnswers = {}; 
 let currentQuestionIndex = 0; 
 let quizId = null;
-let globalQuestionStats = {}; // Biến lưu "bộ nhớ" (cờ đỏ)
+let globalQuestionStats = {}; 
+// ✅ Biến mới để lưu tùy chọn
+let shouldShuffleQuestions = false;
+let shouldShuffleChoices = false;
 
 // === LẤY CÁC PHẦN TỬ DOM ===
 const quizTitleElem = document.getElementById('quiz-title');
@@ -18,6 +21,15 @@ const quizResultDisplay = document.getElementById('quiz-result-display');
 const quizQuestionsWrapper = document.getElementById('quiz-questions-wrapper');
 const quizScoreElem = document.getElementById('quiz-score');
 const userInfoNav = document.getElementById('user-info-nav');
+// ❌ Xóa 2 biến công tắc
+
+// === HÀM TIỆN ÍCH: TRỘN MẢNG ===
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
 
 // === CHẠY KHI TẢI TRANG ===
 document.addEventListener('DOMContentLoaded', async function() {
@@ -35,9 +47,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    // 2. Lấy quizId từ URL
+    // 2. Lấy quizId và TÙY CHỌN TRỘN từ URL
     const params = new URLSearchParams(window.location.search);
     quizId = params.get('quiz_id');
+    // ✅ Đọc tùy chọn từ URL
+    shouldShuffleQuestions = params.get('shuffle_q') === 'true';
+    shouldShuffleChoices = params.get('shuffle_c') === 'true';
+
     if (!quizId) {
         quizErrorElem.innerText = 'Lỗi: Không tìm thấy ID của quiz.';
         quizQuestionsWrapper.style.display = 'none';
@@ -50,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // 4. Gắn sự kiện cho các nút
     prevButton.addEventListener('click', showPreviousQuestion);
     nextButton.addEventListener('click', showNextQuestion);
-    submitButton.addEventListener('click', submitQuiz); // Sửa: gọi hàm submitQuiz (không phải async)
+    submitButton.addEventListener('click', submitQuiz);
 });
 
 // === HÀM TẢI DỮ LIỆU QUIZ TỪ API ===
@@ -62,6 +78,12 @@ async function fetchQuizData(id) {
         }
         
         const quizData = await response.json();
+        
+        // ✅ === LOGIC TRỘN CÂU HỎI ===
+        if (shouldShuffleQuestions) {
+            shuffleArray(quizData.questions);
+        }
+        // ============================
         
         allQuestions = quizData.questions;
         userAnswers = {}; 
@@ -75,7 +97,7 @@ async function fetchQuizData(id) {
         
         // LẤY "BỘ NHỚ" (STATS)
         const token = localStorage.getItem('quizAIToken');
-        globalQuestionStats = {}; // Reset biến toàn cục
+        globalQuestionStats = {}; 
         
         if (token) { 
             try {
@@ -101,7 +123,6 @@ async function fetchQuizData(id) {
         
     } catch (err) {
         quizErrorElem.innerText = err.message;
-        // Ẩn các phần không cần thiết
         quizTitleElem.style.display = 'none';
         const qContainer = document.getElementById('question-container');
         if (qContainer) qContainer.style.display = 'none';
@@ -124,12 +145,18 @@ function renderQuestion(index, questionStats) {
     questionTextElem.innerHTML = `${index + 1}. ${escapeHTML(question.question_text)} ${flagIcon}`;
     choicesContainerElem.innerHTML = ''; 
     
-    const choices = [
+    let choices = [
         { key: 'A', value: question.choice_a },
         { key: 'B', value: question.choice_b },
         { key: 'C', value: question.choice_c },
         { key: 'D', value: question.choice_d }
     ];
+
+    // ✅ === LOGIC TRỘN ĐÁP ÁN ===
+    if (shouldShuffleChoices) {
+        shuffleArray(choices);
+    }
+    // ============================
     
     choices.forEach(choice => {
         const label = document.createElement('label');
@@ -138,7 +165,7 @@ function renderQuestion(index, questionStats) {
         const radio = document.createElement('input');
         radio.type = 'radio';
         radio.name = `question_${index}`;
-        radio.value = choice.key;
+        radio.value = choice.key; // Quan trọng: Giá trị vẫn là A, B, C, D gốc
         
         if (userAnswers[index] === choice.key) {
             radio.checked = true;
@@ -149,7 +176,7 @@ function renderQuestion(index, questionStats) {
         });
         
         const span = document.createElement('span');
-        span.innerHTML = ` ${choice.key}: ${escapeHTML(choice.value)}`;
+        span.innerHTML = ` ${escapeHTML(choice.value)}`;
         
         label.appendChild(radio);
         label.appendChild(span);
@@ -159,7 +186,7 @@ function renderQuestion(index, questionStats) {
     questionCounterElem.innerText = `Câu ${index + 1} / ${allQuestions.length}`;
 }
 
-// === HÀM ĐIỀU HƯỚNG (ĐÃ SỬA LỖI) ===
+// === HÀM ĐIỀU HƯỚNG ===
 function updateNavButtons() {
     prevButton.disabled = (currentQuestionIndex === 0);
     
@@ -175,7 +202,6 @@ function updateNavButtons() {
 function showNextQuestion() {
     if (currentQuestionIndex < allQuestions.length - 1) {
         currentQuestionIndex++;
-        // ✅ Sửa: Luôn truyền biến 'globalQuestionStats'
         renderQuestion(currentQuestionIndex, globalQuestionStats); 
     }
     updateNavButtons();
@@ -184,14 +210,13 @@ function showNextQuestion() {
 function showPreviousQuestion() {
     if (currentQuestionIndex > 0) {
         currentQuestionIndex--;
-        // ✅ Sửa: Luôn truyền biến 'globalQuestionStats'
         renderQuestion(currentQuestionIndex, globalQuestionStats); 
     }
     updateNavButtons();
 }
 
-// === HÀM NỘP BÀI VÀ CHẤM ĐIỂM (ĐÃ CẬP NHẬT) ===
-async function submitQuiz() { // Chuyển hàm này thành async
+// === HÀM NỘP BÀI VÀ CHẤM ĐIỂM ===
+async function submitQuiz() {
     if (!confirm("Bạn có chắc chắn muốn nộp bài?")) {
         return;
     }
@@ -208,7 +233,7 @@ async function submitQuiz() { // Chuyển hàm này thành async
     quizResultDisplay.style.display = 'block';
     quizScoreElem.innerText = `Bạn đã đúng ${score} / ${allQuestions.length} câu.`;
 
-    // === ✅ CẬP NHẬT: Gửi kết quả về server VÀ XỬ LÝ LỖI ===
+    // Gửi kết quả về server
     const resultsData = allQuestions.map((question, index) => ({
         question_id: question.id,
         is_correct: (userAnswers[index] === question.correct_answer)
@@ -227,21 +252,16 @@ async function submitQuiz() { // Chuyển hàm này thành async
             });
 
             if (!response.ok) {
-                // Nếu server báo lỗi (4xx, 5xx)
                 const errorData = await response.json();
                 console.error("Lỗi khi gửi kết quả:", errorData.detail || 'Lỗi không xác định');
-                // (Có thể thêm 1 <p> thông báo lỗi ở đây nếu muốn)
             } else {
-                // Gửi thành công
                 const data = await response.json();
                 console.log(data.message); 
             }
         } catch (err) {
-            // Lỗi mạng
             console.error("Lỗi kết nối khi gửi kết quả:", err);
         }
     }
-    // === KẾT THÚC CẬP NHẬT ===
 
     renderResults();
 }
@@ -269,8 +289,10 @@ function renderResults() {
             
             if (choice.key === correctAnswer) {
                 className = 'correct';
+                label = ' (Đáp án đúng)';
             } else if (choice.key === userAnswer) {
                 className = 'incorrect';
+                label = ' (Bạn chọn)';
             }
             choicesHTML += `<li class="${className}">${choice.key}: ${escapeHTML(choice.value)} <span class="correct-answer-text">${label}</span></li>`;
         });
