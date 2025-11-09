@@ -1,19 +1,19 @@
 from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload  # ✅ 1. IMPORT JOINEDLOAD
 from typing import List, Optional
 from datetime import timedelta
-import io # Import io để xử lý file bytes
-import fitz # Import PyMuPDF (fitz)
-import docx # === MỚI: Thư viện Word ===
-from pptx import Presentation # === MỚI: Thư viện PowerPoint ===
+import io
+import fitz
+import docx
+from pptx import Presentation
 
 # Import các file .py của bạn
-from . import models, schemas, security 
+from . import models, schemas, security
 from .database import engine, SessionLocal
 import google.generativeai as genai
-from pydantic import BaseModel, Field # ✅ Import thêm Field
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 import os
 import json
@@ -102,27 +102,19 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# --- (TÁI CẤU TRÚC) HÀM LÕI AI (ĐÃ CẬP NHẬT PROMPT) ---
+# --- (TÁI CẤU TRÚC) HÀM LÕI AI ---
 def _generate_quiz_from_text(text: str, num_questions: int, quiz_type: str):
-    """
-    Hàm lõi: Nhận văn bản và tùy chọn, gọi AI và trả về (data, error).
-    """
-    
-    # "Dịch" các tùy chọn sang hướng dẫn cho AI
     quiz_type_instructions = {
         "mcq": "Trắc nghiệm 4 lựa chọn (A, B, C, D).",
         "fill_in_blank": "Trắc nghiệm dạng điền vào chỗ trống. Câu hỏi phải có một dấu ba chấm '...' hoặc '____' để điền.",
         "exercise": "Câu hỏi dạng bài tập vận dụng hoặc giải quyết vấn đề dựa trên nội dung.",
         "mixed": "Hỗn hợp nhiều dạng câu hỏi (trắc nghiệm, điền khuyết, bài tập)."
     }
-    
-    # Lấy hướng dẫn, nếu không tìm thấy thì dùng mcq làm mặc định
     instruction = quiz_type_instructions.get(quiz_type, quiz_type_instructions["mcq"])
 
     try:
         model = genai.GenerativeModel("gemini-2.5-flash") 
         
-        #  PROMPT ĐÃ ĐƯỢC NÂNG CẤP 
         prompt = f"""
         Dựa vào đoạn văn bản sau đây:
         "{text}"
@@ -145,16 +137,6 @@ def _generate_quiz_from_text(text: str, num_questions: int, quiz_type: str):
               "D": "Lựa chọn D"
             }},
             "dap_an": "A"
-          }},
-          {{
-            "cau_hoi": "Câu hỏi 2 ...?",
-            "lua_chon": {{
-              "A": "Lựa chọn A",
-              "B": "Lựa chọn B",
-              "C": "Lựa chọn C",
-              "D": "Lựa chọn D"
-            }},
-            "dap_an": "B"
           }}
         ]
         """
@@ -174,11 +156,10 @@ def _generate_quiz_from_text(text: str, num_questions: int, quiz_type: str):
 
 # --- API QUIZ (TẠO VÀ LƯU) ---
 
-# Cập nhật Schema: Thêm 2 trường mới
 class QuizRequest(BaseModel):
     text: str
-    num_questions: int = Field(5, gt=0, le=25) # Mặc định là 5, giới hạn 1-25
-    quiz_type: str = "mcq" # Mặc định là trắc nghiệm
+    num_questions: int = Field(5, gt=0, le=20)
+    quiz_type: str = "mcq"
 
 @app.post("/generate-quiz") 
 def generate_quiz_from_text(request: QuizRequest):
@@ -186,7 +167,6 @@ def generate_quiz_from_text(request: QuizRequest):
     if not input_text:
         return {"error": "Vui lòng nhập nội dung văn bản."}
 
-    # ✅ Gửi thêm 2 tham số mới
     quiz_data, error = _generate_quiz_from_text(
         request.text, request.num_questions, request.quiz_type
     )
@@ -195,39 +175,31 @@ def generate_quiz_from_text(request: QuizRequest):
         return {"error": error}
     return {"quiz_data": quiz_data}
 
-# ✅ Cập nhật API: Thêm 2 tham số mới từ Form
 @app.post("/upload-quiz-file")
 async def generate_quiz_from_file(
     file: UploadFile = File(...),
-    num_questions: int = Form(5), # Nhận từ Form, mặc định là 5
-    quiz_type: str = Form("mcq") # Nhận từ Form, mặc định là "mcq"
+    num_questions: int = Form(5),
+    quiz_type: str = Form("mcq")
 ):
     if not file:
         return {"error": "Vui lòng tải lên một file."}
         
     extracted_text = ""
-    file_bytes = await file.read() # Đọc file vào bộ nhớ
-    file_extension = os.path.splitext(file.filename)[1].lower() # Lấy đuôi file .pdf, .docx
+    file_bytes = await file.read()
+    file_extension = os.path.splitext(file.filename)[1].lower()
     
     try:
-        # 1. Xử lý file .txt
         if file_extension == ".txt":
             extracted_text = file_bytes.decode("utf-8")
-        
-        # 2. Xử lý file .pdf
         elif file_extension == ".pdf":
             with fitz.open(stream=io.BytesIO(file_bytes), filetype="pdf") as doc:
                 for page in doc:
                     extracted_text += page.get_text()
-        
-        # 3. === MỚI: Xử lý file .docx (Word) ===
         elif file_extension == ".docx":
             doc_stream = io.BytesIO(file_bytes)
             doc = docx.Document(doc_stream)
             all_text = [p.text for p in doc.paragraphs]
             extracted_text = "\n".join(all_text)
-            
-        # 4. === MỚI: Xử lý file .pptx (PowerPoint) ===
         elif file_extension == ".pptx":
             ppt_stream = io.BytesIO(file_bytes)
             prs = Presentation(ppt_stream)
@@ -237,9 +209,7 @@ async def generate_quiz_from_file(
                     if hasattr(shape, "text"):
                         all_text.append(shape.text)
             extracted_text = "\n".join(all_text)
-
         else:
-            # === CẬP NHẬT: Thông báo lỗi ===
             return {"error": "Định dạng file không được hỗ trợ. Chỉ chấp nhận .txt, .pdf, .docx, .pptx."}
             
     except Exception as e:
@@ -249,7 +219,6 @@ async def generate_quiz_from_file(
     if not extracted_text.strip():
         return {"error": "File không có nội dung hoặc không thể trích xuất văn bản."}
     
-    # 5. Gọi hàm AI lõi
     quiz_data, error = _generate_quiz_from_text(
         extracted_text, num_questions, quiz_type
     )
@@ -298,12 +267,24 @@ def save_quiz(
         print(f"Lỗi khi lưu quiz: {e}")
         raise HTTPException(status_code=500, detail=f"Lỗi máy chủ nội bộ: {e}")
 
+# ✅ SỬA API /MY-QUIZZES
 @app.get("/my-quizzes", response_model=List[schemas.QuizOut])
 def get_user_quizzes(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    return current_user.quizzes
+    """
+    Trả về danh sách quiz VÀ các câu hỏi của chúng.
+    """
+    user_with_quizzes = db.query(models.User).options(
+        joinedload(models.User.quizzes) # Tải các quiz
+            .joinedload(models.Quiz.questions) # Tải các câu hỏi cho từng quiz
+    ).filter(models.User.id == current_user.id).first()
+    
+    if not user_with_quizzes:
+        return []
+        
+    return user_with_quizzes.quizzes
 
 @app.delete("/quizzes/{quiz_id}")
 def delete_quiz(
@@ -338,12 +319,96 @@ def update_quiz_title(
     db.refresh(quiz)
     return quiz
 
+# ✅ SỬA API /QUIZ/{QUIZ_ID}
 @app.get("/quiz/{quiz_id}", response_model=schemas.QuizOut)
 def get_quiz_details(
     quiz_id: int,
     db: Session = Depends(get_db)
 ):
-    quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+    """
+    Lấy chi tiết một bộ quiz VÀ các câu hỏi của nó.
+    """
+    quiz = db.query(models.Quiz).options(
+        joinedload(models.Quiz.questions) # Tải các câu hỏi liên quan
+    ).filter(models.Quiz.id == quiz_id).first()
+    
     if not quiz:
         raise HTTPException(status_code=404, detail="Không tìm thấy bộ quiz")
     return quiz
+
+
+# === API NHẬN KẾT QUẢ VÀ "ĐÁNH GIÁ" (ĐÃ SỬA LỖI) ===
+class QuizResult(BaseModel):
+    question_id: int
+    is_correct: bool
+
+@app.post("/submit-quiz/{quiz_id}")
+def submit_quiz_results(
+    quiz_id: int, 
+    results: List[QuizResult], # Nhận một danh sách kết quả
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user) # Bắt buộc đăng nhập
+):
+    """
+    Nhận kết quả làm bài của user và cập nhật "bộ nhớ" (bảng stats)
+    """
+    try:
+        for result in results:
+            stat = db.query(models.UserQuestionStats).filter(
+                models.UserQuestionStats.user_id == current_user.id,
+                models.UserQuestionStats.question_id == result.question_id
+            ).first()
+            
+            # === SỬA LỖI Ở ĐÂY ===
+            if not stat:
+                # Nếu chưa có, tạo mới VÀ gán giá trị ban đầu là 0
+                stat = models.UserQuestionStats(
+                    user_id=current_user.id,
+                    question_id=result.question_id,
+                    correct_attempts=0,    # <-- THÊM DÒNG NÀY
+                    incorrect_attempts=0   # <-- THÊM DÒNG NÀY
+                )
+                db.add(stat)
+            # === KẾT THÚC SỬA LỖI ===
+            
+            # 3. Cập nhật "bộ nhớ"
+            if result.is_correct:
+                stat.correct_attempts += 1
+            else:
+                stat.incorrect_attempts += 1
+                
+        # 4. Lưu tất cả thay đổi
+        db.commit()
+    except Exception as e:
+        db.rollback() # Hoàn tác nếu có lỗi
+        print(f"Lỗi khi submit quiz: {e}")
+        raise HTTPException(status_code=500, detail="Lỗi máy chủ khi lưu kết quả.")
+
+    return {"message": "Đã ghi nhận kết quả ôn tập."}
+
+class QuestionStatOut(BaseModel):
+    question_id: int
+    is_frequently_wrong: bool
+
+@app.get("/my-question-stats/{quiz_id}", response_model=List[QuestionStatOut])
+def get_question_stats_for_quiz(
+    quiz_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    question_ids = db.query(models.Question.id).filter(models.Question.quiz_id == quiz_id).all()
+    q_ids = [id_tuple[0] for id_tuple in question_ids]
+    stats = db.query(models.UserQuestionStats).filter(
+        models.UserQuestionStats.user_id == current_user.id,
+        models.UserQuestionStats.question_id.in_(q_ids)
+    ).all()
+    result_list = []
+    for s in stats:
+        is_wrong = (s.incorrect_attempts > 0) and (s.incorrect_attempts >= s.correct_attempts)
+        result_list.append(
+            QuestionStatOut(
+                question_id=s.question_id,
+                is_frequently_wrong=is_wrong
+            )
+        )
+    return result_list

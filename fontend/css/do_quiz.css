@@ -51,3 +51,10 @@
     font-weight: bold;
     color: #0a3622;
 }
+
+/* === CSS MỚI CHO CỜ ĐỎ === */
+.red-flag {
+    color: red;
+    font-size: 1.2rem;
+    cursor: help; /* Hiển thị icon '?' khi hover */
+}

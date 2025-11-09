@@ -44,3 +44,22 @@ class Question(Base):
 
     # Mối quan hệ: Một Question thuộc về một Quiz
     quiz = relationship("Quiz", back_populates="questions")
+
+
+class UserQuestionStats(Base):
+    __tablename__ = "user_question_stats"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
+    
+    # "Bộ nhớ" mà bạn muốn
+    correct_attempts = Column(Integer, default=0)    # Số lần trả lời đúng
+    incorrect_attempts = Column(Integer, default=0)  # Số lần trả lời sai
+    
+    last_attempted_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    # Mối quan hệ (không bắt buộc nhưng nên có)
+    user = relationship("User")
+    question = relationship("Question")
