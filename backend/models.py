@@ -52,7 +52,7 @@ class UserQuestionStats(Base):
     id = Column(Integer, primary_key=True, index=True)
     
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
+    question_id = Column(Integer, ForeignKey("questions.id", ondelete="CASCADE"), nullable=False)
     
     # "Bộ nhớ" mà bạn muốn
     correct_attempts = Column(Integer, default=0)    # Số lần trả lời đúng
