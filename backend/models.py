@@ -40,6 +40,8 @@ class Question(Base):
     choice_c = Column(String(255), nullable=False)
     choice_d = Column(String(255), nullable=False)
     correct_answer = Column(String(1), nullable=False) # 'A', 'B', 'C', 'D'
+    explanation = Column(Text, nullable=True) # Giải thích ngắn gọn
+    citation = Column(Text, nullable=True)    # Trích dẫn từ tài liệu
     quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)
 
     # Mối quan hệ: Một Question thuộc về một Quiz

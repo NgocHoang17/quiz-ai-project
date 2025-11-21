@@ -102,7 +102,7 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# --- (TÁI CẤU TRÚC) HÀM LÕI AI ---
+# --- HÀM LÕI AI ---
 def _generate_quiz_from_text(text: str, num_questions: int, quiz_type: str):
     quiz_type_instructions = {
         "mcq": "Trắc nghiệm 4 lựa chọn (A, B, C, D).",
@@ -119,24 +119,22 @@ def _generate_quiz_from_text(text: str, num_questions: int, quiz_type: str):
         Dựa vào đoạn văn bản sau đây:
         "{text}"
 
-        Hãy thực hiện 2 yêu cầu sau:
-        1. Yêu cầu số lượng: Tạo chính xác {num_questions} câu hỏi.
-        2. Yêu cầu loại câu hỏi: {instruction}
+       Hãy thực hiện các yêu cầu sau:
+        1. Tạo chính xác {num_questions} câu hỏi loại: {instruction}
+        2. Với mỗi câu hỏi, hãy viết một lời "giai_thich" ngắn gọn (tại sao đáp án đó đúng).
+        3. Với mỗi câu hỏi, hãy tìm "trich_dan" là CÂU NGUYÊN VĂN trong văn bản chứa thông tin trả lời.
 
-        QUY TẮC ĐỊNH DẠNG:
+        QUY TẮC ĐỊNH DẠNG JSON:
         - Trả về CHUỖI JSON hợp lệ, KHÔNG thêm văn bản giải thích nào bên ngoài.
         - MỖI câu hỏi phải có 4 lựa chọn (A, B, C, D) và 1 đáp án đúng (dù là dạng điền khuyết hay bài tập).
         - Định dạng JSON phải là một danh sách (list) các đối tượng:
         [
           {{
-            "cau_hoi": "Câu hỏi 1 ...?",
-            "lua_chon": {{
-              "A": "Lựa chọn A",
-              "B": "Lựa chọn B",
-              "C": "Lựa chọn C",
-              "D": "Lựa chọn D"
-            }},
-            "dap_an": "A"
+            "cau_hoi": "Câu hỏi...?",
+            "lua_chon": {{ "A": "...", "B": "...", "C": "...", "D": "..." }},
+            "dap_an": "A",
+            "giai_thich": "Giải thích ngắn gọn...",
+            "trich_dan": "Trích dẫn nguyên văn từ tài liệu..."
           }}
         ]
         """
@@ -253,6 +251,8 @@ def save_quiz(
                 choice_c=q.choice_c,
                 choice_d=q.choice_d,
                 correct_answer=q.correct_answer,
+                explanation=q.explanation,
+                citation=q.citation,
                 quiz_id=new_quiz.id
             )
             db.add(new_question)

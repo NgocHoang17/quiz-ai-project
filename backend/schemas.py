@@ -10,6 +10,8 @@ class QuestionBase(BaseModel):
     choice_c: str
     choice_d: str
     correct_answer: str
+    explanation: Optional[str] = None
+    citation: Optional[str] = None
 
 class QuestionCreate(QuestionBase):
     pass

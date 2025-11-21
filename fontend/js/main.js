@@ -198,7 +198,9 @@ saveQuizButton.addEventListener('click', async function() {
             choice_b: q.lua_chon.B,
             choice_c: q.lua_chon.C,
             choice_d: q.lua_chon.D,
-            correct_answer: q.dap_an
+            correct_answer: q.dap_an,
+            explanation: q.giai_thich || "Không có giải thích",
+            citation: q.trich_dan || "Không có trích dẫn"
         }))
     };
     saveQuizMessage.innerText = 'Đang lưu...';

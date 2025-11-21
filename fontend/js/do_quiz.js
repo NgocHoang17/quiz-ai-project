@@ -297,9 +297,21 @@ function renderResults() {
             choicesHTML += `<li class="${className}">${choice.key}: ${escapeHTML(choice.value)} <span class="correct-answer-text">${label}</span></li>`;
         });
 
+// === CẬP NHẬT HIỂN THỊ GIẢI THÍCH & TRÍCH DẪN ===
+        let explanationHTML = '';
+        if (question.explanation) {
+            explanationHTML = `
+                <div class="mt-2 p-2 bg-light border rounded">
+                    <strong>💡 Giải thích:</strong> ${escapeHTML(question.explanation)}<br>
+                    <small class="text-muted"><em>📖 Nguồn: "${escapeHTML(question.citation)}"</em></small>
+                </div>
+            `;
+        }
+
         questionDiv.innerHTML = `
             <h4>Câu ${index + 1}: ${escapeHTML(question.question_text)}</h4>
             <ul>${choicesHTML}</ul>
+            ${explanationHTML}
         `;
         
         quizResultDisplay.appendChild(questionDiv);
