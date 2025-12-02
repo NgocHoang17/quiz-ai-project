@@ -238,7 +238,8 @@ def save_quiz(
     try:
         new_quiz = models.Quiz(
             title=quiz_to_save.title,
-            owner_id=current_user.id 
+            owner_id=current_user.id,
+            folder_id=quiz_to_save.folder_id
         )
         db.add(new_quiz)
         db.commit()
@@ -453,3 +454,63 @@ def get_recent_quizzes(
         .all()
     
     return recent_quizzes
+
+
+# === API QUẢN LÝ FOLDER (MỚI) ===
+
+@app.post("/folders", response_model=schemas.FolderOut)
+def create_folder(
+    folder: schemas.FolderCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    new_folder = models.Folder(name=folder.name, user_id=current_user.id)
+    db.add(new_folder)
+    db.commit()
+    db.refresh(new_folder)
+    return new_folder
+
+@app.get("/folders", response_model=List[schemas.FolderOut])
+def get_user_folders(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    return db.query(models.Folder).filter(models.Folder.user_id == current_user.id).all()
+
+@app.delete("/folders/{folder_id}")
+def delete_folder(
+    folder_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    # Tìm folder
+    folder = db.query(models.Folder).filter(models.Folder.id == folder_id).first()
+    if not folder or folder.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Không tìm thấy thư mục")
+    
+    # Logic xóa: Khi xóa folder, các quiz bên trong sẽ được đẩy ra ngoài (folder_id = NULL)
+    # Thay vì xóa luôn quiz (nguy hiểm).
+    quizzes_in_folder = db.query(models.Quiz).filter(models.Quiz.folder_id == folder_id).all()
+    for q in quizzes_in_folder:
+        q.folder_id = None
+    
+    db.delete(folder)
+    db.commit()
+    return {"message": "Đã xóa thư mục (các quiz đã được chuyển ra ngoài)"}
+
+# === API DI CHUYỂN QUIZ VÀO FOLDER (MỚI) ===
+@app.put("/quizzes/{quiz_id}/move")
+def move_quiz(
+    quiz_id: int,
+    move_data: schemas.MoveQuizSchema,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+    if not quiz or quiz.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Không tìm thấy quiz")
+    
+    # Cập nhật folder_id (có thể là một số ID hoặc None)
+    quiz.folder_id = move_data.folder_id
+    db.commit()
+    return {"message": "Đã di chuyển quiz thành công"}

@@ -1,9 +1,9 @@
-// Biến toàn cục để lưu trữ dữ liệu quiz AI vừa tạo
+// Biến toàn cục
 let currentQuizData = null;
+let saveQuizModal = null; // Biến cho Modal lưu
 
-// === PHẦN KIỂM TRA XÁC THỰC (AUTH GUARD) ===
+// === AUTH GUARD ===
 document.addEventListener('DOMContentLoaded', function() {
-    // ... (Toàn bộ code Auth Guard và Logout giữ nguyên) ...
     const token = localStorage.getItem('quizAIToken');
     const email = localStorage.getItem('quizAIUserEmail');
 
@@ -11,79 +11,60 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = 'login.html';
         return; 
     } else {
-        const welcomeMessage = document.getElementById('welcome-message');
-        welcomeMessage.innerText = `Chào mừng, ${email}!`;
+        document.getElementById('welcome-message').innerText = `Chào mừng, ${email}!`;
     }
 
-    const logoutButton = document.getElementById('logout-button');
-    logoutButton.addEventListener('click', function() {
+    // Init Modal
+    const modalEl = document.getElementById('saveQuizModal');
+    if (modalEl) {
+        saveQuizModal = new bootstrap.Modal(modalEl);
+    }
+
+    document.getElementById('logout-button').addEventListener('click', function() {
         localStorage.removeItem('quizAIToken');
         localStorage.removeItem('quizAIUserEmail');
         window.location.href = 'login.html';
     });
 });
 
-// === PHẦN XỬ LÝ TẠO QUIZ (ĐÃ CẬP NHẬT) ===
-
-// Lấy các phần tử HTML
+// === LOGIC TẠO QUIZ ===
 const generateButton = document.getElementById('generate-button');
 const loadingMessage = document.getElementById('loading');
 const quizResultDiv = document.getElementById('quiz-result');
 const saveQuizButton = document.getElementById('save-quiz-button');
 const saveQuizMessage = document.getElementById('save-quiz-message');
 
-// Lấy các phần tử của Tab
 const textInput = document.getElementById('text-input');
 const fileInput = document.getElementById('file-input');
 const textTabButton = document.getElementById('text-tab');
-const fileTabButton = document.getElementById('file-tab');
 
-// ✅✅✅ LẤY CÁC PHẦN TỬ TÙY CHỌN MỚI ✅✅✅
 const quizCountInput = document.getElementById('quiz-count');
 const quizTypeSelect = document.getElementById('quiz-type');
 
-// Gắn sự kiện "click" cho nút Tạo Quiz
+// === NÚT TẠO QUIZ ===
 generateButton.addEventListener('click', function() {
-    
-    // 1. Lấy các tùy chọn mới
     const numQuestions = parseInt(quizCountInput.value);
     const quizType = quizTypeSelect.value;
     
-    // 2. Kiểm tra tùy chọn
-    if (isNaN(numQuestions) || numQuestions < 1 || numQuestions > 25) {
-        alert("Vui lòng nhập số lượng câu hỏi hợp lệ (từ 1 đến 25).");
+    if (isNaN(numQuestions) || numQuestions < 1 || numQuestions > 20) {
+        alert("Vui lòng nhập số lượng câu hỏi hợp lệ (1-20).");
         return;
     }
 
-    // 3. Kiểm tra xem tab nào đang active
     const isTextTabActive = textTabButton.classList.contains('active');
-    
-    // 4. Đặt lại trạng thái
     resetQuizState();
 
     if (isTextTabActive) {
-        // --- Logic cho Tab "Dán văn bản" ---
         const text = textInput.value; 
-        if (!text) {
-            alert('Vui lòng nhập văn bản!');
-            return;
-        }
-        // Gọi API /generate-quiz (đã thêm tùy chọn)
+        if (!text) { alert('Vui lòng nhập văn bản!'); return; }
         fetchQuizFromText(text, numQuestions, quizType);
-        
     } else {
-        // --- Logic cho Tab "Tải file" ---
         const file = fileInput.files[0];
-        if (!file) {
-            alert('Vui lòng chọn một file!');
-            return;
-        }
-        // Gọi API /upload-quiz-file (đã thêm tùy chọn)
+        if (!file) { alert('Vui lòng chọn một file!'); return; }
         fetchQuizFromFile(file, numQuestions, quizType);
     }
 });
 
-// Hàm reset trạng thái (giữ nguyên)
 function resetQuizState() {
     loadingMessage.style.display = 'block';
     quizResultDiv.innerHTML = '<p class="text-muted">Đang tạo quiz...</p>';
@@ -92,30 +73,21 @@ function resetQuizState() {
     currentQuizData = null; 
 }
 
-// === CẬP NHẬT CÁC HÀM FETCH ===
-
-// Hàm gọi API /generate-quiz (cho text)
+// === API CALLS ===
 function fetchQuizFromText(text, numQuestions, quizType) {
     fetch('http://127.0.0.1:8000/generate-quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // ✅ Gửi thêm tùy chọn trong body
-        body: JSON.stringify({ 
-            text: text, 
-            num_questions: numQuestions, 
-            quiz_type: quizType 
-        })
+        body: JSON.stringify({ text: text, num_questions: numQuestions, quiz_type: quizType })
     })
     .then(response => response.json())
-    .then(handleApiResponse) // Dùng hàm xử lý chung
+    .then(handleApiResponse)
     .catch(handleApiError);
 }
 
-// Hàm gọi API /upload-quiz-file (cho file)
 function fetchQuizFromFile(file, numQuestions, quizType) {
     const formData = new FormData();
     formData.append('file', file);
-    // ✅ Gửi thêm tùy chọn dưới dạng Form Data
     formData.append('num_questions', numQuestions);
     formData.append('quiz_type', quizType);
     
@@ -124,11 +96,10 @@ function fetchQuizFromFile(file, numQuestions, quizType) {
         body: formData 
     })
     .then(response => response.json())
-    .then(handleApiResponse) // Dùng hàm xử lý chung
+    .then(handleApiResponse)
     .catch(handleApiError);
 }
 
-// --- Các hàm xử lý kết quả (Dùng chung) (Giữ nguyên) ---
 function handleApiResponse(data) {
     loadingMessage.style.display = 'none'; 
     if (data.error) {
@@ -143,15 +114,14 @@ function handleApiResponse(data) {
         }
     }
 }
+
 function handleApiError(error) {
     loadingMessage.style.display = 'none'; 
     console.error('Lỗi nghiêm trọng:', error);
     quizResultDiv.innerHTML = '<p class="text-danger">Lỗi nghiêm trọng! Không thể kết nối đến server.</p>';
 }
 
-// Hàm "vẽ" quiz ra HTML (Giữ nguyên)
 function displayQuiz(quizArray) {
-    // ... (Code giữ nguyên) ...
     quizResultDiv.innerHTML = '';
     quizArray.forEach((questionItem, index) => {
         const questionDiv = document.createElement('div');
@@ -173,25 +143,59 @@ function displayQuiz(quizArray) {
     });
 }
 
-// === PHẦN XỬ LÝ LƯU QUIZ (Giữ nguyên) ===
+// === ✅✅✅ LOGIC LƯU QUIZ VỚI FOLDER ✅✅✅ ===
+
+// 1. Khi nhấn nút "Lưu Quiz này" (Màu xanh) -> Mở Modal
 saveQuizButton.addEventListener('click', async function() {
-    // ... (Toàn bộ code Lưu Quiz giữ nguyên) ...
-    if (!currentQuizData) {
-        alert("Không có dữ liệu quiz để lưu!");
-        return;
-    }
+    if (!currentQuizData) { alert("Không có dữ liệu quiz!"); return; }
+    
     const token = localStorage.getItem('quizAIToken');
     if (!token) {
-        alert("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
         window.location.href = 'login.html';
         return;
     }
-    const quizTitle = prompt("Nhập tên cho bộ quiz này:", "Quiz mới");
-    if (!quizTitle) { 
-        return;
+
+    // Tải danh sách folder để điền vào Select
+    const folderSelect = document.getElementById('save-quiz-folder-select');
+    folderSelect.innerHTML = '<option value="">Đang tải...</option>';
+    
+    try {
+        const res = await fetch('http://127.0.0.1:8000/folders', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const folders = await res.json();
+            folderSelect.innerHTML = '<option value="">(Thư mục gốc)</option>';
+            folders.forEach(f => {
+                folderSelect.innerHTML += `<option value="${f.id}">${f.name}</option>`;
+            });
+            // Mở Modal
+            saveQuizModal.show();
+        } else {
+            alert("Lỗi tải danh sách thư mục.");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Lỗi kết nối.");
     }
+});
+
+// 2. Khi nhấn nút "Lưu ngay" TRONG MODAL
+document.getElementById('confirm-save-quiz-btn').addEventListener('click', async function() {
+    const token = localStorage.getItem('quizAIToken');
+    
+    const titleInput = document.getElementById('save-quiz-title-input');
+    const folderSelect = document.getElementById('save-quiz-folder-select');
+    
+    const quizTitle = titleInput.value.trim() || "Quiz mới";
+    const folderIdVal = folderSelect.value;
+    // Chuyển folderId thành số hoặc null
+    const folderId = folderIdVal === "" ? null : parseInt(folderIdVal);
+
+    // Chuẩn bị dữ liệu
     const dataToSave = {
         title: quizTitle,
+        folder_id: folderId, // ✅ Gửi thêm folder_id
         questions: currentQuizData.map(q => ({
             question_text: q.cau_hoi,
             choice_a: q.lua_chon.A,
@@ -203,8 +207,12 @@ saveQuizButton.addEventListener('click', async function() {
             citation: q.trich_dan || "Không có trích dẫn"
         }))
     };
+    
+    // Đóng modal & Hiện thông báo đang lưu
+    saveQuizModal.hide();
     saveQuizMessage.innerText = 'Đang lưu...';
     saveQuizMessage.className = 'text-primary';
+
     try {
         const response = await fetch('http://127.0.0.1:8000/save-quiz', {
             method: 'POST',
@@ -214,17 +222,15 @@ saveQuizButton.addEventListener('click', async function() {
             },
             body: JSON.stringify(dataToSave)
         });
+
         if (response.ok) { 
             const savedQuiz = await response.json();
             saveQuizMessage.innerText = `✅ Đã lưu thành công bộ quiz: "${savedQuiz.title}"`;
             saveQuizMessage.className = 'text-success';
-            saveQuizButton.style.display = 'none';
+            saveQuizButton.style.display = 'none'; // Ẩn nút sau khi lưu
         } else if (response.status === 401) {
-            saveQuizMessage.innerText = '❌ Lỗi: Phiên đăng nhập đã hết hạn. Vui lòng đăng xuất và đăng nhập lại!';
-            saveQuizMessage.className = 'text-danger';
-            alert("Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại.");
+            saveQuizMessage.innerText = '❌ Lỗi: Hết phiên đăng nhập.';
             localStorage.removeItem('quizAIToken');
-            localStorage.removeItem('quizAIUserEmail');
             window.location.href = 'login.html';
         } else {
             const errorData = await response.json();
@@ -232,8 +238,8 @@ saveQuizButton.addEventListener('click', async function() {
             saveQuizMessage.className = 'text-danger';
         }
     } catch (err) {
-        console.error("Lỗi khi lưu quiz:", err);
-        saveQuizMessage.innerText = '❌ Lỗi kết nối. Không thể lưu quiz.';
+        console.error("Lỗi lưu:", err);
+        saveQuizMessage.innerText = '❌ Lỗi kết nối.';
         saveQuizMessage.className = 'text-danger';
     }
 });

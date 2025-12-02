@@ -1,33 +1,46 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Text, TIMESTAMP
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func # Để lấy thời gian mặc định
-from .database import Base # Import Base từ file database.py
+from sqlalchemy.sql import func 
+from .database import Base 
 
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    # Tăng độ dài của String để tương thích với MySQL
     email = Column(String(255), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True)
     
-    # Mối quan hệ: Một User có thể có nhiều Quizzes
+    # Quan hệ
     quizzes = relationship("Quiz", back_populates="owner")
+    folders = relationship("Folder", back_populates="owner") # ✅ MỚI
+
+class Folder(Base): # ✅ CLASS MỚI
+    __tablename__ = "folders"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    
+    # Quan hệ
+    owner = relationship("User", back_populates="folders")
+    quizzes = relationship("Quiz", back_populates="folder")
 
 class Quiz(Base):
     __tablename__ = "quizzes"
     
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False, default="Bộ quiz mới")
-    # server_default=func.now() sẽ tự động thêm thời gian khi tạo
     created_at = Column(TIMESTAMP, server_default=func.now())
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    # ✅ THÊM CỘT FOLDER_ID (Cho phép NULL = nằm ở thư mục gốc)
+    folder_id = Column(Integer, ForeignKey("folders.id"), nullable=True)
 
-    # Mối quan hệ: Một Quiz thuộc về một User
+    # Quan hệ
     owner = relationship("User", back_populates="quizzes")
-    # Mối quan hệ: Một Quiz có nhiều Questions
-    # cascade="all, delete-orphan": Nếu xóa Quiz, các Question liên quan sẽ tự động bị xóa
+    folder = relationship("Folder", back_populates="quizzes") # ✅ MỚI
     questions = relationship("Question", back_populates="quiz", cascade="all, delete-orphan")
 
 class Question(Base):
@@ -39,29 +52,26 @@ class Question(Base):
     choice_b = Column(String(255), nullable=False)
     choice_c = Column(String(255), nullable=False)
     choice_d = Column(String(255), nullable=False)
-    correct_answer = Column(String(1), nullable=False) # 'A', 'B', 'C', 'D'
-    explanation = Column(Text, nullable=True) # Giải thích ngắn gọn
-    citation = Column(Text, nullable=True)    # Trích dẫn từ tài liệu
-    quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)
+    correct_answer = Column(String(1), nullable=False) 
+    
+    explanation = Column(Text, nullable=True)
+    citation = Column(Text, nullable=True)
+    
+    quiz_id = Column(Integer, ForeignKey("quizzes.id", ondelete="CASCADE"), nullable=False) # Đã có cascade
 
-    # Mối quan hệ: Một Question thuộc về một Quiz
     quiz = relationship("Quiz", back_populates="questions")
-
 
 class UserQuestionStats(Base):
     __tablename__ = "user_question_stats"
     
     id = Column(Integer, primary_key=True, index=True)
-    
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    # Lưu ý: ondelete="CASCADE" ở đây để tránh lỗi khi xóa câu hỏi
     question_id = Column(Integer, ForeignKey("questions.id", ondelete="CASCADE"), nullable=False)
     
-    # "Bộ nhớ" mà bạn muốn
-    correct_attempts = Column(Integer, default=0)    # Số lần trả lời đúng
-    incorrect_attempts = Column(Integer, default=0)  # Số lần trả lời sai
-    
+    correct_attempts = Column(Integer, default=0)    
+    incorrect_attempts = Column(Integer, default=0)  
     last_attempted_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    # Mối quan hệ (không bắt buộc nhưng nên có)
     user = relationship("User")
     question = relationship("Question")

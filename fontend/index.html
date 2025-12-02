@@ -125,6 +125,33 @@
         </div> 
     </main> 
 
+    <div class="modal fade" id="saveQuizModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Lưu bộ Quiz này</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="save-quiz-title-input" class="form-label">Tên bộ Quiz</label>
+                        <input type="text" class="form-control" id="save-quiz-title-input" value="Quiz mới" placeholder="Nhập tên quiz...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="save-quiz-folder-select" class="form-label">Lưu vào thư mục</label>
+                        <select class="form-select" id="save-quiz-folder-select">
+                            <option value="">(Thư mục gốc)</option>
+                            </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-success" id="confirm-save-quiz-btn">Lưu ngay</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js" defer></script>
 </body>
