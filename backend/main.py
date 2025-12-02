@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session, joinedload  # ✅ 1. IMPORT JOINEDLOAD
+from sqlalchemy.orm import Session, joinedload  
+from sqlalchemy import func
 from typing import List, Optional
 from datetime import timedelta
 import io
@@ -412,3 +413,43 @@ def get_question_stats_for_quiz(
             )
         )
     return result_list
+
+@app.get("/dashboard-stats")
+def get_dashboard_stats(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    # 1. Đếm tổng số Quiz
+    total_quizzes = db.query(models.Quiz).filter(models.Quiz.owner_id == current_user.id).count()
+    
+    # 2. Tính tổng số câu đúng / sai
+    stats = db.query(
+        func.sum(models.UserQuestionStats.correct_attempts),
+        func.sum(models.UserQuestionStats.incorrect_attempts)
+    ).filter(models.UserQuestionStats.user_id == current_user.id).first()
+    
+    total_correct = stats[0] if stats[0] else 0
+    total_incorrect = stats[1] if stats[1] else 0
+    total_questions_answered = total_correct + total_incorrect
+    
+    return {
+        "total_quizzes": total_quizzes,
+        "total_questions_answered": total_questions_answered,
+        "total_correct": total_correct,
+        "total_incorrect": total_incorrect
+    }
+
+# === API LẤY 5 QUIZ GẦN NHẤT CHO DASHBOARD ===
+@app.get("/recent-quizzes", response_model=List[schemas.QuizOut])
+def get_recent_quizzes(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Lấy 5 bộ quiz được tạo gần đây nhất"""
+    recent_quizzes = db.query(models.Quiz)\
+        .filter(models.Quiz.owner_id == current_user.id)\
+        .order_by(models.Quiz.created_at.desc())\
+        .limit(5)\
+        .all()
+    
+    return recent_quizzes

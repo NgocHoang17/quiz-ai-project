@@ -5,24 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Làm Quiz - QuizAI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/do_quiz.css">
 </head>
-<body>
+<body class="bg-light">
     
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
         <div class="container-fluid">
-            <a class="navbar-brand" href="index.html">QuizAI</a>
+            <a class="navbar-brand fw-bold" href="dashboard.html">
+                <i class="fa-solid fa-brain me-2"></i>QuizAI
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="index.html">Tạo Quiz mới</a>
+                        <a class="nav-link" href="dashboard.html">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="my_quizzes.html">Quiz của tôi</a>
+                        <a class="nav-link" href="index.html">Tạo Quiz</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my_quizzes.html">Thư viện</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center" id="user-info-nav">
@@ -32,33 +38,54 @@
     </nav>
 
     <main class="container mt-4 quiz-container">
-        <div class="card shadow-sm">
-            <div class="card-body">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
                 
                 <div id="quiz-result-display" style="display: none;">
-                    <h2 class="h4" id="quiz-result-title">Kết quả</h2>
-                    <p class="fs-5" id="quiz-score">Bạn đã đúng 0/0 câu.</p>
-                    <button class="btn btn-primary" onclick="location.reload()">Làm lại</button>
-                    <a href="my_quizzes.html" class="btn btn-secondary">Quay về danh sách</a>
-                </div>
+                    <h2 class="h4 text-primary fw-bold mb-3" id="quiz-result-title">
+                        <i class="fa-solid fa-square-poll-vertical me-2"></i>Kết quả
+                    </h2>
+                    <div class="alert alert-info fs-5" id="quiz-score">Bạn đã đúng 0/0 câu.</div>
+                    
+                    <div class="d-flex gap-2 mb-4">
+                        <button class="btn btn-primary" onclick="location.reload()">
+                            <i class="fa-solid fa-rotate-right me-1"></i> Làm lại
+                        </button>
+                        <a href="my_quizzes.html" class="btn btn-outline-secondary">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Quay về thư viện
+                        </a>
+                    </div>
+                    </div>
 
                 <div id="quiz-questions-wrapper">
-                    <h2 class="h4" id="quiz-title">Đang tải quiz...</h2>
+                    <h2 class="h4 fw-bold text-dark mb-3" id="quiz-title">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                        Đang tải quiz...
+                    </h2>
                     <hr>
                     
+                    <p id="quiz-error" class="text-danger fw-bold"></p>
+
                     <div id="question-container">
-                        <p class.="fs-5" id="question-text">Câu hỏi...</p>
-                        <div id="choices-container" class="mt-3">
+                        <p class="fs-5 fw-medium" id="question-text"></p>
+                        <div id="choices-container" class="mt-4">
                             </div>
                     </div>
-                    
-                    <p id="quiz-error" class="text-danger"></p>
 
-                    <div class="d-flex justify-content-between mt-4">
-                        <button class="btn btn-secondary" id="prev-button" disabled>Câu trước</button>
-                        <span id="question-counter" class="align-self-center text-muted">Câu 1 / X</span>
-                        <button class="btn btn-primary" id="next-button">Câu tiếp</button>
-                        <button class="btn btn-success" id="submit-button" style="display: none;">Nộp bài</button>
+                    <div class="d-flex justify-content-between align-items-center mt-5">
+                        <button class="btn btn-outline-secondary px-4" id="prev-button" disabled>
+                            <i class="fa-solid fa-chevron-left me-1"></i> Câu trước
+                        </button>
+                        
+                        <span id="question-counter" class="badge bg-secondary fs-6 rounded-pill">Câu 1 / X</span>
+                        
+                        <button class="btn btn-primary px-4" id="next-button">
+                            Câu tiếp <i class="fa-solid fa-chevron-right ms-1"></i>
+                        </button>
+                        
+                        <button class="btn btn-success px-4" id="submit-button" style="display: none;">
+                            <i class="fa-solid fa-check me-1"></i> Nộp bài
+                        </button>
                     </div>
                 </div>
 

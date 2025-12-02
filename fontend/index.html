@@ -3,30 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang chủ - QuizAI</title>
+    <title>Tạo Quiz - QuizAI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">QuizAI</a>
+            <a class="navbar-brand fw-bold" href="dashboard.html">
+                <i class="fa-solid fa-brain me-2"></i>QuizAI
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" href="index.html">Tạo Quiz mới</a>
+                        <a class="nav-link" href="dashboard.html">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="my_quizzes.html">Quiz của tôi</a>
+                        <a class="nav-link active" href="index.html">Tạo Quiz</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my_quizzes.html">Thư viện</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center">
-                    <span class="navbar-text me-3" id="welcome-message"></span>
-                    <button class="btn btn-outline-danger" id="logout-button">Đăng xuất</button>
+                    <span class="navbar-text me-3 text-white" id="welcome-message"></span>
+                    <button class="btn btn-outline-danger btn-sm" id="logout-button">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -34,71 +43,81 @@
 
     <main class="container mt-4">
         <div class="row g-4">
-            
             <div class="col-lg-6">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm h-100">
                     <div class="card-body">
-                        
                         <ul class="nav nav-tabs" id="createQuizTab" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-tab-pane" type="button" role="tab" aria-controls="text-tab-pane" aria-selected="true">Dán văn bản</button>
+                                <button class="nav-link active" id="file-tab" data-bs-toggle="tab" data-bs-target="#file-tab-pane" type="button">Tải file lên</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="file-tab" data-bs-toggle="tab" data-bs-target="#file-tab-pane" type="button" role="tab" aria-controls="file-tab-pane" aria-selected="false">Tải file lên (.txt, .pdf, .docx, .pptx)</button>
+                                <button class="nav-link " id="text-tab" data-bs-toggle="tab" data-bs-target="#text-tab-pane" type="button">Dán văn bản</button>
                             </li>
+                            
                         </ul>
-                        <div class="tab-content" id="createQuizTabContent">
-                            <div class="tab-pane fade show active p-3" id="text-tab-pane" role="tabpanel" aria-labelledby="text-tab" tabindex="0">
-                                <h2 class="h4 card-title">Tạo Quiz từ văn bản</h2>
-                                <p class="card-text">Dán văn bản của bạn vào ô bên dưới.</p>
-                                <textarea class="form-control" id="text-input" rows="10" placeholder="Dán văn bản của bạn vào đây..."></textarea>
+
+                        <div class="tab-content mt-3" id="createQuizTabContent">
+                            <div class="tab-pane fade show active" id="file-tab-pane" role="tabpanel">
+                                <div class="border p-4 rounded text-center bg-light">
+                                    <i class="fa-solid fa-cloud-arrow-up display-4 text-secondary mb-3"></i>
+                                    <p>Chọn file .txt, .pdf, .docx, .pptx</p>
+                                    <input class="form-control" type="file" id="file-input" accept=".txt,.pdf,.docx,.pptx">
+                                </div>
                             </div>
-                            <div class="tab-pane fade p-3" id="file-tab-pane" role="tabpanel" aria-labelledby="file-tab" tabindex="0">
-                                <h2 class="h4 card-title">Tạo Quiz từ File</h2>
-                                <p class="card-text">Chọn một file .txt, .pdf, .docx hoặc .pptx để tải lên.</p>
-                                <input class="form-control" type="file" id="file-input" accept=".txt,.pdf,.docx,.pptx">
+                            <div class="tab-pane fade " id="text-tab-pane" role="tabpanel">
+                                <textarea class="form-control" id="text-input" rows="10" placeholder="Dán văn bản vào đây..."></textarea>
                             </div>
+                            
                         </div>
-                        <div class="row g-2 mt-3 px-3">
+
+                        <div class="row g-2 mt-3">
                             <div class="col-md">
                                 <div class="form-floating">
-                                    <input type="number" class="form-control" id="quiz-count" value="5" min="1" max="25">
-                                    <label for="quiz-count">Số lượng (1-25)</label>
+                                    <input type="number" class="form-control" id="quiz-count" value="5" min="1" max="20">
+                                    <label>Số lượng (1-25)</label>
                                 </div>
                             </div>
                             <div class="col-md">
                                 <div class="form-floating">
                                     <select class="form-select" id="quiz-type">
-                                        <option value="mcq" selected>Trắc nghiệm (4 lựa chọn)</option>
+                                        <option value="mcq" selected>Trắc nghiệm</option>
                                         <option value="fill_in_blank">Điền khuyết</option>
                                         <option value="exercise">Bài tập</option>
-                                        <option value="mixed">Hỗn hợp (Tất cả)</option>
+                                        <option value="mixed">Hỗn hợp</option>
                                     </select>
-                                    <label for="quiz-type">Loại câu hỏi</label>
+                                    <label>Loại câu hỏi</label>
                                 </div>
                             </div>
                         </div>
-                        <button class="btn btn-primary w-100 mt-3" id="generate-button">
-                            Tạo Quiz
+
+                        <button class="btn btn-primary w-100 mt-3 py-2 fw-bold" id="generate-button">
+                            <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Tạo Quiz Ngay
                         </button>
                         
-                        <p id="loading" class="mt-3 text-primary" style="display: none;">
+                        <div id="loading" class="mt-3 text-center text-primary" style="display: none;">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
                             Đang xử lý, vui lòng chờ...
-                        </p>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-6">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm h-100">
                     <div class="card-body">
-                        <h2 class="h4 card-title">Kết quả</h2>
-                        <button class="btn btn-success w-100 mb-3" id="save-quiz-button" style="display: none;">
-                            Lưu Quiz này
-                        </button>
+                        <h4 class="card-title d-flex justify-content-between align-items-center">
+                            Kết quả
+                            <button class="btn btn-success btn-sm" id="save-quiz-button" style="display: none;">
+                                <i class="fa-solid fa-floppy-disk me-1"></i> Lưu Quiz
+                            </button>
+                        </h4>
                         <p id="save-quiz-message"></p>
-                        <div id="quiz-result">
-                            <p class="text-muted">Kết quả quiz sẽ xuất hiện ở đây...</p>
+                        <hr>
+                        <div id="quiz-result" class="overflow-auto" style="max-height: 600px;">
+                            <p class="text-muted text-center mt-5">
+                                <i class="fa-regular fa-file-lines display-1 mb-3 d-block opacity-25"></i>
+                                Kết quả quiz sẽ xuất hiện ở đây...
+                            </p>
                         </div>
                     </div>
                 </div>

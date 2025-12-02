@@ -1,0 +1,53 @@
+/* Dashboard Card Stats */
+.stats-card {
+    border: none;
+    border-radius: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.stats-icon {
+    font-size: 2.5rem;
+    opacity: 0.3;
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+}
+
+/* Gradient Backgrounds cho Cards */
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #4e73df, #224abe);
+    color: white;
+}
+.bg-gradient-success {
+    background: linear-gradient(45deg, #1cc88a, #13855c);
+    color: white;
+}
+.bg-gradient-info {
+    background: linear-gradient(45deg, #36b9cc, #258391);
+    color: white;
+}
+.bg-gradient-warning {
+    background: linear-gradient(45deg, #f6c23e, #dda20a);
+    color: white;
+}
+
+/* Bảng Quiz gần đây */
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+/* Biểu đồ */
+.chart-container {
+    position: relative;
+    height: 250px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}

@@ -104,7 +104,7 @@ if (loginForm) {
                 localStorage.setItem('quizAIUserEmail', email);
                 
                 // Chuyển hướng đến trang chính
-                window.location.href = 'index.html';
+                window.location.href = 'dashboard.html';
             }
         } catch (err) {
             // Lỗi mạng

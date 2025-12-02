@@ -3,57 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz của tôi - QuizAI</title>
+    <title>Thư viện - QuizAI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="bg-light">
     
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
         <div class="container-fluid">
-            <a class="navbar-brand" href="index.html">QuizAI</a>
+            <a class="navbar-brand fw-bold" href="dashboard.html">
+                <i class="fa-solid fa-brain me-2"></i>QuizAI
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="index.html">Tạo Quiz mới</a>
+                        <a class="nav-link" href="dashboard.html">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="my_quizzes.html">Quiz của tôi</a>
+                        <a class="nav-link" href="index.html">Tạo Quiz</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="my_quizzes.html">Thư viện</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center">
-                    <span class="navbar-text me-3" id="welcome-message"></span>
-                    <button class="btn btn-outline-danger" id="logout-button">Đăng xuất</button>
+                    <span class="navbar-text me-3 text-white" id="welcome-message"></span>
+                    <button class="btn btn-outline-danger btn-sm" id="logout-button">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="container mt-4">
-        <div class="card shadow-sm">
+    <main class="container">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h4 class="mb-0 fw-bold text-primary"><i class="fa-solid fa-list-ul me-2"></i>Danh sách Quiz đã lưu</h4>
+            </div>
             <div class="card-body">
-                <h2 class="h4 card-title mb-3">Danh sách Quiz đã lưu</h2>
                 
-                <p id="loading-quizzes" class="text-primary">Đang tải danh sách quiz...</p>
+                <p id="loading-quizzes" class="text-primary text-center">
+                </p>
                 
-                <div id="quiz-list-container" class="list-group">
+                <div id="quiz-list-container" class="list-group list-group-flush">
                     </div>
             </div>
         </div>
     </main>
 
-    <div class="modal fade" id="viewQuizModal" tabindex="-1" aria-labelledby="viewQuizModalLabel" aria-hidden="true">
+    <div class="modal fade" id="viewQuizModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="viewQuizModalLabel">Nội dung Quiz</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" id="viewQuizModalBody">
-                    </div>
+                <div class="modal-body" id="viewQuizModalBody"></div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                 </div>
@@ -61,12 +71,12 @@
         </div>
     </div>
 
-    <div class="modal fade" id="startQuizOptionsModal" tabindex="-1" aria-labelledby="startQuizModalLabel" aria-hidden="true">
+    <div class="modal fade" id="startQuizOptionsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="startQuizModalLabel">Tùy chọn làm bài</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title">Tùy chọn làm bài</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <p>Chọn các tùy chọn cho lần làm bài này:</p>
@@ -81,11 +91,14 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary" id="start-quiz-button">Bắt đầu!</button>
+                    <button type="button" class="btn btn-primary" id="start-quiz-button">
+                        <i class="fa-solid fa-play me-1"></i> Bắt đầu!
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/my_quizzes.js" defer></script>
 </body>
