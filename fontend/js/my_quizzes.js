@@ -164,6 +164,11 @@ function createQuizElement(quiz) {
                         </button>
                     </li>
                     <li>
+                        <button class="dropdown-item" onclick="downloadDocx(${quiz.id})">
+                            <i class="fa-solid fa-file-word me-2 text-primary"></i> Tải xuống
+                        </button>
+                    </li>
+                    <li>
                         <button class="dropdown-item" onclick="shareQuiz(${quiz.id})">
                             <i class="fa-solid fa-share-nodes me-2 text-success"></i> Chia sẻ
                         </button>
@@ -335,4 +340,11 @@ function formatTimeAgo(dateString) {
     if (hours < 24) return `${hours} giờ trước`;
     const days = Math.floor(hours / 24);
     return `${days} ngày trước`;
+}
+
+// === HÀM TẢI FILE WORD ===
+function downloadDocx(quizId) {
+    // Vì là GET request trả về file, ta có thể dùng cách mở tab mới
+    // hoặc gán location.href. Cách này đơn giản nhất.
+    window.location.href = `http://127.0.0.1:8000/quizzes/${quizId}/export/docx`;
 }

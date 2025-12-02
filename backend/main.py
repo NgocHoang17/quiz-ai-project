@@ -9,6 +9,9 @@ import io
 import fitz
 import docx
 from pptx import Presentation
+from fastapi.responses import StreamingResponse #  Cần thêm cái này để trả về file
+from docx.shared import Pt # Để chỉnh cỡ chữ
+from docx.enum.text import WD_ALIGN_PARAGRAPH # Để căn lề
 
 # Import các file .py của bạn
 from . import models, schemas, security
@@ -514,3 +517,74 @@ def move_quiz(
     quiz.folder_id = move_data.folder_id
     db.commit()
     return {"message": "Đã di chuyển quiz thành công"}
+
+
+# === API XUẤT QUIZ RA FILE WORD (.DOCX) ===
+@app.get("/quizzes/{quiz_id}/export/docx")
+def export_quiz_docx(
+    quiz_id: int,
+    db: Session = Depends(get_db),
+    # current_user: models.User = Depends(get_current_user) # Có thể bỏ comment nếu muốn bảo mật
+):
+    # 1. Lấy dữ liệu quiz
+    quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Không tìm thấy quiz")
+
+    # 2. Tạo file Word trong bộ nhớ
+    doc = docx.Document()
+    
+    # -- Tiêu đề --
+    heading = doc.add_heading(quiz.title, 0)
+    heading.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    
+    doc.add_paragraph(f"Số lượng câu hỏi: {len(quiz.questions)}")
+    doc.add_paragraph("-" * 50)
+
+    # -- Danh sách câu hỏi --
+    for i, q in enumerate(quiz.questions):
+        # Câu hỏi (In đậm)
+        p = doc.add_paragraph()
+        run = p.add_run(f"Câu {i+1}: {q.question_text}")
+        run.bold = True
+        run.font.size = Pt(12)
+        
+        # Các lựa chọn
+        doc.add_paragraph(f"A. {q.choice_a}")
+        doc.add_paragraph(f"B. {q.choice_b}")
+        doc.add_paragraph(f"C. {q.choice_c}")
+        doc.add_paragraph(f"D. {q.choice_d}")
+        
+        doc.add_paragraph() # Dòng trống ngăn cách
+
+    # -- Phần Đáp án (Sang trang mới) --
+    doc.add_page_break()
+    doc.add_heading("ĐÁP ÁN & GIẢI THÍCH", 1)
+    
+    for i, q in enumerate(quiz.questions):
+        p = doc.add_paragraph()
+        runner = p.add_run(f"Câu {i+1}: Đáp án {q.correct_answer}")
+        runner.bold = True
+        
+        if q.explanation:
+            doc.add_paragraph(f"Giải thích: {q.explanation}")
+        
+        doc.add_paragraph("-" * 20)
+
+    # 3. Lưu file vào bộ nhớ đệm (BytesIO) thay vì ổ cứng
+    byte_io = io.BytesIO()
+    doc.save(byte_io)
+    byte_io.seek(0) # Đưa con trỏ về đầu file
+
+    # 4. Trả về file cho trình duyệt tải xuống
+    filename = f"Quiz_{quiz.id}.docx"
+    
+    # Cần quote tên file để tránh lỗi nếu có dấu tiếng Việt/khoảng trắng
+    from urllib.parse import quote
+    encoded_filename = quote(filename)
+
+    return StreamingResponse(
+        byte_io,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename*=utf-8''{encoded_filename}"}
+    )
