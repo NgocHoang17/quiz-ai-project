@@ -108,6 +108,11 @@ function createQuizElement(quiz, index) {
         <p class="mb-1">Bao gồm ${quiz.questions.length} câu hỏi.</p>
         
         <button class="btn btn-primary btn-sm mt-2" onclick="startQuiz(${quiz.id})">Làm bài</button>
+        
+        <a href="flashcard.html?quiz_id=${quiz.id}" class="btn btn-dark btn-sm mt-2">
+            <i class="fa-solid fa-layer-group"></i> Flashcard
+        </a>
+
         <button class="btn btn-success btn-sm mt-2" onclick="shareQuiz(${quiz.id})">Chia sẻ</button>
         <button class="btn btn-info btn-sm mt-2" onclick="viewQuiz(${index})">Xem</button>
         <button class="btn btn-warning btn-sm mt-2" onclick="editQuizTitle(${index})">Sửa tên</button>
