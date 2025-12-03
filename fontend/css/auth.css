@@ -1,59 +1,246 @@
-html,
-body {
-  height: 100%;
+/* === GOOGLE FONTS === */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
+
+/* === RESET & BODY === */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
+html, body {
+    height: 100%;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #99e6ff 100%);
+    background-attachment: fixed;
+    color: #1e293b;
+}
+
+/* === AUTH CARD - NÂNG CẤP ĐẸP MẮT === */
 .auth-card {
-  max-width: 400px;
-  padding: 1.5rem;
-  margin: auto;
+    max-width: 420px;
+    width: 90%;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 
+        0 15px 35px rgba(13, 110, 253, 0.15),
+        0 5px 15px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
 }
 
-.auth-card .form-floating:focus-within {
-  z-index: 2;
+.auth-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 
+        0 20px 40px rgba(13, 110, 253, 0.2),
+        0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
-#login-form input[type="email"],
-#register-form input[type="email"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
+/* === TIÊU ĐỀ === */
+.auth-card h1 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.75rem;
+    text-align: center;
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.8rem;
+    letter-spacing: -0.5px;
 }
 
-#login-form input[type="password"],
-#register-form input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+/* === FORM FLOATING - NÂNG CẤP === */
+.form-floating {
+    margin-bottom: 1rem;
+    position: relative;
 }
 
+.form-floating > .form-control {
+    height: 58px;
+    padding: 1rem 0.75rem;
+    font-size: 1rem;
+    border: 1.8px solid #cbd5e1;
+    border-radius: 12px;
+    background-color: #fafcff;
+    transition: all 0.25s ease;
+}
+
+.form-floating > .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+    background-color: #fff;
+    z-index: 10;
+}
+
+.form-floating > label {
+    padding: 1rem 0.75rem;
+    font-weight: 500;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+/* Xử lý bo góc khi 2 input liền nhau */
+#login-form .form-floating:first-child .form-control,
+#register-form .form-floating:first-child .form-control {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+#login-form .form-floating:last-of-type .form-control,
+#register-form .form-floating:last-of-type .form-control {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    margin-top: -1px;
+}
+
+/* === NÚT ĐĂNG NHẬP / ĐĂNG KÝ === */
+.btn-primary {
+    width: 100%;
+    padding: 0.75rem;
+    font-weight: 600;
+    font-size: 1.05rem;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    border: none;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+    margin-top: 0.5rem;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0a58ca, #084298);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* === THÔNG BÁO === */
 .auth-message {
     text-align: center;
-    font-size: 0.9rem;
-    font-weight: bold;
-}
-
-/* === CSS MỚI CHO THÔNG BÁO === */
-.text-danger {
-    color: #dc3545; /* Màu đỏ */
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.75rem;
+    border-radius: 10px;
+    margin: 1rem 0;
+    min-height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .text-success {
-    color: #198754; /* Màu xanh lá */
+    color: #166534;
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
 }
-/* ============================= */
 
+/* .text-danger {
+    color: #991b1b;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+} */
+
+/* === LIÊN KẾT CHUYỂN TRANG === */
 .switch-page {
     text-align: center;
     margin-top: 1.5rem;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    color: #475569;
 }
 
 .switch-page a {
-    color: #007bff;
+    color: #0d6efd;
+    font-weight: 600;
     text-decoration: none;
+    padding: 0.2rem 0;
+    border-bottom: 1.5px solid transparent;
+    transition: all 0.2s ease;
 }
 
 .switch-page a:hover {
-    text-decoration: underline;
+    color: #0a58ca;
+    border-bottom-color: #0d6efd;
+}
+
+/* === HIỆU ỨNG KHI FOCUS INPUT === */
+.form-floating:focus-within {
+    z-index: 10;
+}
+
+/* === MOBILE RESPONSIVE === */
+@media (max-width: 480px) {
+    .auth-card {
+        margin: 1rem auto;
+        padding: 1.5rem;
+        width: 95%;
+    }
+    
+    .auth-card h1 {
+        font-size: 1.6rem;
+    }
+    
+    .btn-primary {
+        font-size: 1rem;
+        padding: 0.7rem;
+    }
+}
+
+/* === ẨN / HIỆN MẬT KHẨU === */
+.position-relative {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 11;
+    color: #64748b;
+    transition: all 0.2s ease;
+    padding: 4px;
+    border-radius: 6px;
+}
+
+.password-toggle:hover {
+    color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.08);
+}
+
+.eye-icon {
+    display: block;
+    transition: stroke 0.2s ease;
+}
+
+/* Khi đang hiện mật khẩu → đổi thành mắt gạch chéo */
+.password-toggle.show .eye-icon {
+    stroke-dasharray: 8;
+}
+
+.password-toggle.show .eye-icon path:first-child {
+    d: path("M1 12s4-8 11-8 11 8 11 8");
+    opacity: 0.3;
+}
+
+.password-toggle.show .eye-icon::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -2px;
+    right: -2px;
+    height: 2px;
+    background: currentColor;
+    transform: rotate(-45deg);
+    border-radius: 1px;
 }

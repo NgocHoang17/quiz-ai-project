@@ -64,7 +64,7 @@ async function loadRecentQuizzes(token) {
 
             quizzes.forEach(quiz => {
                 const item = document.createElement('a');
-                item.href = `my_quizzes.html`; // Bấm vào là làm bài luôn
+                item.href = `my_quizzes.html`; // 
                 item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
                 
                 const date = new Date(quiz.created_at).toLocaleDateString('vi-VN');

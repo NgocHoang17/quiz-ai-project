@@ -1,7 +1,9 @@
 /* CSS chung */
 body { 
-    background-color: #f8f9fa; /* Màu nền xám nhạt */
+    background-color: #fafde1; /* Màu nền tùy chỉnh */
 }
+
+/* Tùy chỉnh Textarea */
 textarea { 
     width: 95%; 
     height: 200px; 
@@ -10,63 +12,24 @@ textarea {
     border: 1px solid #ccc; 
     border-radius: 5px; 
 }
-/* Đảm bảo các nút Bootstrap có màu chuẩn */
-button, .btn { 
-    padding: .375rem .75rem;
-    font-size: 1rem;
-    cursor: pointer; 
-    border-radius: .375rem; 
-    border: 1px solid transparent;
-}
-.btn-primary { background-color: #0d6efd; color: white; border-color: #0d6efd; }
-.btn-primary:hover { background-color: #0b5ed7; border-color: #0a58ca; }
-.btn-success { background-color: #198754; color: white; border-color: #198754; }
-.btn-success:hover { background-color: #157347; border-color: #146c43; }
-.btn-info { background-color: #0dcaf0; color: black; border-color: #0dcaf0; }
-.btn-info:hover { background-color: #31d2f2; border-color: #25cff2; }
-.btn-warning { background-color: #ffc107; color: black; border-color: #ffc107; }
-.btn-warning:hover { background-color: #ffca2c; border-color: #ffc720; }
-.btn-danger { background-color: #dc3545; color: white; border-color: #dc3545; }
-.btn-danger:hover { background-color: #bb2d3b; border-color: #b02a37; }
-.btn-outline-danger { color: #dc3545; border-color: #dc3545; background-color: transparent; }
-.btn-outline-danger:hover { background-color: #dc3545; color: white; }
-.btn-sm { padding: .25rem .5rem; font-size: .875rem; border-radius: .25rem; }
-.mt-2 { margin-top: .5rem !important; }
 
-/* CSS cho thanh Navbar */
+/* Tùy chỉnh font cho Navbar */
 .navbar-brand {
     font-weight: bold;
 }
 
-/* CSS cho thanh User (trang index) */
-.user-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #f0f0f0;
-    padding: 10px 15px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-}
-.user-container span {
-    font-weight: bold;
-}
-
-/* CSS cho kết quả quiz (trang index) */
+/* CSS cho thông báo loading & save */
 #loading { 
     display: none; 
-    color: #0d6efd; /* Màu xanh dương */
+    color: #0d6efd; 
 }
 #save-quiz-message {
     text-align: center;
     font-weight: bold;
     font-size: 0.95rem;
 }
-.text-success { color: #198754; }
-.text-danger { color: #dc3545; }
-.text-primary { color: #0d6efd; }
 
-/* CSS chung cho .quiz-question (dùng ở index và my_quizzes modal) */
+/* CSS chung cho .quiz-question */
 .quiz-question {
     background-color: #fdfdfd;
     border: 1px solid #ddd;
@@ -87,12 +50,14 @@ button, .btn {
 .quiz-question li {
     margin-bottom: 5px;
 }
+
+/* Class tô màu đáp án đúng */
 .correct-answer {
     color: #198754; 
     font-weight: bold;
 }
 
-/* CSS MỚI CHO TRANG "MY QUIZZES" */
+/* Tinh chỉnh cho danh sách Quiz */
 .list-group-item h5 {
     color: #0d6efd; 
 }
@@ -100,37 +65,154 @@ button, .btn {
     margin-right: 5px; 
 }
 
-/* CSS CHO MODAL XEM QUIZ */
+/* Tinh chỉnh riêng cho Modal Xem Quiz */
 #viewQuizModalBody .quiz-question {
     border: 1px dashed #ccc;
     background-color: #fdfdfd;
 }
 
-
-/* === CSS CHO FOLDER === */
+/* === CSS CHO TÍNH NĂNG FOLDER (GIỮ LẠI) === */
 .folder-card {
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
-    border: 1px solid #dee2e6;
-    background-color: #fff;
+    border: 2px solid #ffc107; /* Viền nhẹ */
+    background-color: #fff9db; /* Nền trắng */
+    border-left: 6px solid #ffc107; /* Điểm nhấn màu vàng bên trái */
 }
 
 .folder-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    background-color: #f8f9fa;
+    background-color: #fff2b1; /* Nền vàng nhạt khi hover */
 }
 
 .folder-icon {
     font-size: 2.5rem;
-    color: #ffc107; /* Màu vàng thư mục */
+    color: #ffc107; /* Màu vàng đặc trưng của thư mục */
 }
 
 /* Breadcrumb (Thanh đường dẫn) */
 .breadcrumb-item a {
     text-decoration: none;
     color: #0d6efd;
+    font-weight: 500;
 }
 .breadcrumb-item.active {
     color: #6c757d;
+}
+
+
+/* === NAVBAR HIỆN ĐẠI (MODERN NAVBAR) === */
+
+/* 1. Tạo nền Gradient và đổ bóng */
+.custom-navbar {
+    /* Màu nền chuyển từ Xanh đậm sang Tím */
+    background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%); 
+    /* Hoặc màu này nếu bạn thích style Facebook/Messenger: 
+       background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%); 
+    */
+    
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ tạo chiều sâu */
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+}
+
+/* 2. Tùy chỉnh Logo */
+.custom-navbar .navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 800; /* Chữ đậm hơn */
+    letter-spacing: 1px; /* Giãn chữ nhẹ */
+    text-transform: uppercase;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2); /* Bóng chữ */
+}
+
+/* 3. Tùy chỉnh các đường link */
+.custom-navbar .nav-link {
+    font-weight: 500;
+    padding: 8px 15px !important;
+    border-radius: 20px; /* Bo tròn nút */
+    transition: all 0.3s ease; /* Hiệu ứng mượt */
+    margin-right: 5px;
+}
+
+/* Hiệu ứng khi di chuột vào link */
+.custom-navbar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* Nền trắng mờ */
+    transform: translateY(-2px); /* Nổi lên nhẹ */
+    color: #fff !important;
+}
+
+/* Link đang Active (Trang hiện tại) */
+.custom-navbar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.3); /* Nền trắng đậm hơn */
+    color: #fff !important;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Nút Đăng xuất */
+.custom-navbar .btn-outline-light {
+    border-width: 2px;
+    font-weight: bold;
+}
+.custom-navbar .btn-outline-light:hover {
+    background-color: #ff4757; /* Màu đỏ khi hover logout */
+    border-color: #ff4757;
+    color: white;
+}
+
+/* ... (Giữ nguyên toàn bộ code CSS cũ của bạn ở trên) ... */
+
+
+/* === CSS MỚI CHO TRANG TẠO QUIZ (INDEX.HTML) === */
+
+/* Tùy chỉnh Tabs để trông hiện đại hơn */
+.nav-tabs .nav-link {
+    color: #495057;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: 600;
+    padding-bottom: 10px;
+    margin-bottom: -1px;
+}
+
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    border-bottom: 3px solid #0d6efd;
+    background: none;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #0a58ca;
+    border-color: transparent;
+    isolation: isolate; /* Fix lỗi render trên một số trình duyệt */
+}
+
+/* Khu vực Upload File (Viền nét đứt) */
+.upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 10px;
+    transition: all 0.3s;
+    background-color: #f8f9fa;
+}
+
+.upload-area:hover {
+    border-color: #0d6efd;
+    background-color: #e9ecef;
+    cursor: pointer;
+}
+
+/* Khu vực Kết quả */
+.result-area {
+    background-color: #fff;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+}
+
+/* === CSS CHO KÉO THẢ FILE === */
+.upload-area.active {
+    background-color: #e9ecef; /* Màu xám đậm hơn chút */
+    border-color: #0d6efd; /* Viền xanh */
+    border-style: solid; /* Đổi từ nét đứt sang nét liền */
+    transform: scale(1.02); /* Phóng to nhẹ */
 }

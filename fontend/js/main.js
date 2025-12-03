@@ -1,6 +1,6 @@
 // Biến toàn cục
 let currentQuizData = null;
-let saveQuizModal = null; // Biến cho Modal lưu
+let saveQuizModal = null;
 
 // === AUTH GUARD ===
 document.addEventListener('DOMContentLoaded', function() {
@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('welcome-message').innerText = `Chào mừng, ${email}!`;
     }
 
-    // Init Modal
     const modalEl = document.getElementById('saveQuizModal');
     if (modalEl) {
         saveQuizModal = new bootstrap.Modal(modalEl);
@@ -25,6 +24,9 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.removeItem('quizAIUserEmail');
         window.location.href = 'login.html';
     });
+
+    //  KÍCH HOẠT TÍNH NĂNG KÉO THẢ
+    setupDragAndDrop();
 });
 
 // === LOGIC TẠO QUIZ ===
@@ -40,6 +42,54 @@ const textTabButton = document.getElementById('text-tab');
 
 const quizCountInput = document.getElementById('quiz-count');
 const quizTypeSelect = document.getElementById('quiz-type');
+
+// ===  HÀM XỬ LÝ KÉO THẢ (DRAG & DROP) ===
+function setupDragAndDrop() {
+    const uploadArea = document.querySelector('.upload-area');
+    const fileInput = document.getElementById('file-input');
+
+    if (!uploadArea) return;
+
+    // 1. Ngăn chặn hành vi mặc định (mở file) của trình duyệt
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    // 2. Hiệu ứng khi kéo file vào (Highlight)
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, () => uploadArea.classList.add('active'), false);
+    });
+
+    // 3. Bỏ hiệu ứng khi kéo ra hoặc thả
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('active'), false);
+    });
+
+    // 4. Xử lý khi thả file (Drop)
+    uploadArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files.length > 0) {
+            // Gán file vừa thả vào ô input
+            fileInput.files = files;
+            // (Tùy chọn) Thông báo tên file đã chọn lên giao diện nếu cần
+            // Hiện tại input type="file" của Bootstrap sẽ tự hiển thị tên file nếu click, 
+            // nhưng khi drop thì nó không tự update text hiển thị.
+            // Ta có thể alert nhẹ hoặc console log để biết.
+            console.log("Đã nhận file:", files[0].name);
+        }
+    }
+}
+// ==========================================
+
 
 // === NÚT TẠO QUIZ ===
 generateButton.addEventListener('click', function() {
@@ -60,7 +110,7 @@ generateButton.addEventListener('click', function() {
         fetchQuizFromText(text, numQuestions, quizType);
     } else {
         const file = fileInput.files[0];
-        if (!file) { alert('Vui lòng chọn một file!'); return; }
+        if (!file) { alert('Vui lòng chọn (hoặc kéo thả) một file!'); return; }
         fetchQuizFromFile(file, numQuestions, quizType);
     }
 });
@@ -143,9 +193,7 @@ function displayQuiz(quizArray) {
     });
 }
 
-// === ✅✅✅ LOGIC LƯU QUIZ VỚI FOLDER ✅✅✅ ===
-
-// 1. Khi nhấn nút "Lưu Quiz này" (Màu xanh) -> Mở Modal
+// === LOGIC LƯU QUIZ ===
 saveQuizButton.addEventListener('click', async function() {
     if (!currentQuizData) { alert("Không có dữ liệu quiz!"); return; }
     
@@ -155,7 +203,7 @@ saveQuizButton.addEventListener('click', async function() {
         return;
     }
 
-    // Tải danh sách folder để điền vào Select
+    // Tải danh sách folder
     const folderSelect = document.getElementById('save-quiz-folder-select');
     folderSelect.innerHTML = '<option value="">Đang tải...</option>';
     
@@ -169,7 +217,6 @@ saveQuizButton.addEventListener('click', async function() {
             folders.forEach(f => {
                 folderSelect.innerHTML += `<option value="${f.id}">${f.name}</option>`;
             });
-            // Mở Modal
             saveQuizModal.show();
         } else {
             alert("Lỗi tải danh sách thư mục.");
@@ -180,7 +227,6 @@ saveQuizButton.addEventListener('click', async function() {
     }
 });
 
-// 2. Khi nhấn nút "Lưu ngay" TRONG MODAL
 document.getElementById('confirm-save-quiz-btn').addEventListener('click', async function() {
     const token = localStorage.getItem('quizAIToken');
     
@@ -189,13 +235,11 @@ document.getElementById('confirm-save-quiz-btn').addEventListener('click', async
     
     const quizTitle = titleInput.value.trim() || "Quiz mới";
     const folderIdVal = folderSelect.value;
-    // Chuyển folderId thành số hoặc null
     const folderId = folderIdVal === "" ? null : parseInt(folderIdVal);
 
-    // Chuẩn bị dữ liệu
     const dataToSave = {
         title: quizTitle,
-        folder_id: folderId, // ✅ Gửi thêm folder_id
+        folder_id: folderId, 
         questions: currentQuizData.map(q => ({
             question_text: q.cau_hoi,
             choice_a: q.lua_chon.A,
@@ -208,7 +252,6 @@ document.getElementById('confirm-save-quiz-btn').addEventListener('click', async
         }))
     };
     
-    // Đóng modal & Hiện thông báo đang lưu
     saveQuizModal.hide();
     saveQuizMessage.innerText = 'Đang lưu...';
     saveQuizMessage.className = 'text-primary';
@@ -225,9 +268,9 @@ document.getElementById('confirm-save-quiz-btn').addEventListener('click', async
 
         if (response.ok) { 
             const savedQuiz = await response.json();
-            saveQuizMessage.innerText = `✅ Đã lưu thành công bộ quiz: "${savedQuiz.title}"`;
+            saveQuizMessage.innerText = ` Đã lưu thành công bộ quiz: "${savedQuiz.title}"`;
             saveQuizMessage.className = 'text-success';
-            saveQuizButton.style.display = 'none'; // Ẩn nút sau khi lưu
+            saveQuizButton.style.display = 'none'; 
         } else if (response.status === 401) {
             saveQuizMessage.innerText = '❌ Lỗi: Hết phiên đăng nhập.';
             localStorage.removeItem('quizAIToken');

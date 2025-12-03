@@ -112,3 +112,19 @@ if (loginForm) {
         }
     });
 }
+
+// === ẨN / HIỆN MẬT KHẨU ===
+function togglePassword(inputId, toggleElement) {
+    const input = document.getElementById(inputId);
+    const isPassword = input.type === 'password';
+
+    // Đổi type
+    input.type = isPassword ? 'text' : 'password';
+
+    // Đổi class để thay icon
+    if (isPassword) {
+        toggleElement.classList.add('show');
+    } else {
+        toggleElement.classList.remove('show');
+    }
+}
