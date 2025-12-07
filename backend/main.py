@@ -12,6 +12,8 @@ from pptx import Presentation
 from fastapi.responses import StreamingResponse #  Cần thêm cái này để trả về file
 from docx.shared import Pt # Để chỉnh cỡ chữ
 from docx.enum.text import WD_ALIGN_PARAGRAPH # Để căn lề
+from datetime import datetime, timedelta, date # Thêm date, timedelta
+from sqlalchemy import func # Để so sánh ngày trong SQL
 
 # Import các file .py của bạn
 from . import models, schemas, security
@@ -588,3 +590,45 @@ def export_quiz_docx(
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         headers={"Content-Disposition": f"attachment; filename*=utf-8''{encoded_filename}"}
     )
+
+# === API BIỂU ĐỒ HOẠT ĐỘNG (DỮ LIỆU THẬT 7 NGÀY) ===
+# ... (Các import giữ nguyên) ...
+
+@app.get("/activity-chart")
+def get_activity_chart_data(
+    time_range: str = "week", # ✅ Thêm tham số này (mặc định là week)
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    today = date.today()
+    dates = []
+    quizzes_created_data = []
+    questions_answered_data = []
+
+    # Xác định số ngày cần lấy
+    days_to_fetch = 30 if time_range == "month" else 7
+
+    # Lặp từ quá khứ đến hiện tại
+    for i in range(days_to_fetch - 1, -1, -1):
+        target_date = today - timedelta(days=i)
+        dates.append(target_date.strftime("%d/%m"))
+
+        # Đếm số Quiz
+        quiz_count = db.query(models.Quiz).filter(
+            models.Quiz.owner_id == current_user.id,
+            func.date(models.Quiz.created_at) == target_date
+        ).count()
+        quizzes_created_data.append(quiz_count)
+
+        # Đếm số Câu hỏi
+        question_count = db.query(models.UserQuestionStats).filter(
+            models.UserQuestionStats.user_id == current_user.id,
+            func.date(models.UserQuestionStats.last_attempted_at) == target_date
+        ).count()
+        questions_answered_data.append(question_count)
+
+    return {
+        "labels": dates,
+        "created": quizzes_created_data,
+        "answered": questions_answered_data
+    }

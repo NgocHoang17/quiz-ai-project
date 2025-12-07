@@ -1,6 +1,6 @@
 /* CSS chung */
 body { 
-    background-color: #fafde1; /* Màu nền tùy chỉnh */
+    background-color: #fafde1; /* Màu nền tùy chỉnh #fafde1*/
 }
 
 /* Tùy chỉnh Textarea */
@@ -9,7 +9,7 @@ textarea {
     height: 200px; 
     margin-bottom: 10px; 
     padding: 10px; 
-    border: 1px solid #ccc; 
+    border: 1px solid #ccc; /*#ccc*/
     border-radius: 5px; 
 }
 
@@ -71,7 +71,7 @@ textarea {
     background-color: #fdfdfd;
 }
 
-/* === CSS CHO TÍNH NĂNG FOLDER (GIỮ LẠI) === */
+/* === CSS CHO TÍNH NĂNG FOLDER  === */
 .folder-card {
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -153,6 +153,7 @@ textarea {
 /* Nút Đăng xuất */
 .custom-navbar .btn-outline-light {
     border-width: 2px;
+    background-color: #fb8b95;
     font-weight: bold;
 }
 .custom-navbar .btn-outline-light:hover {
@@ -161,10 +162,9 @@ textarea {
     color: white;
 }
 
-/* ... (Giữ nguyên toàn bộ code CSS cũ của bạn ở trên) ... */
 
 
-/* === CSS MỚI CHO TRANG TẠO QUIZ (INDEX.HTML) === */
+/* === CSS CHO TRANG TẠO QUIZ (INDEX.HTML) === */
 
 /* Tùy chỉnh Tabs để trông hiện đại hơn */
 .nav-tabs .nav-link {
@@ -177,13 +177,13 @@ textarea {
 }
 
 .nav-tabs .nav-link.active {
-    color: #0d6efd;
+    color: #059a9c;
     border-bottom: 3px solid #0d6efd;
     background: none;
 }
 
 .nav-tabs .nav-link:hover {
-    color: #0a58ca;
+    color: #4c89df;
     border-color: transparent;
     isolation: isolate; /* Fix lỗi render trên một số trình duyệt */
 }
@@ -204,7 +204,7 @@ textarea {
 
 /* Khu vực Kết quả */
 .result-area {
-    background-color: #fff;
+    background-color: #deeff1;
     border-radius: 10px;
     border: 1px solid #e9ecef;
 }
