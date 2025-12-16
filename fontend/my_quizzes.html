@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,8 +9,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body class="bg-light">
-    
+
     <nav class="navbar navbar-expand-lg navbar-dark custom-navbar mb-4">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold" href="dashboard.html">
@@ -41,14 +43,17 @@
     </nav>
 
     <main class="container">
-        <div class="card shadow-sm border-0 min-vh-100"> <div class="card-header bg-white py-3">
+        <div class="card shadow-sm border-0 min-vh-100">
+            <div class="card-header bg-white py-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0 fw-bold text-primary"><i class="fa-solid fa-folder-open me-2"></i>Thư viện của tôi</h4>
-                    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createFolderModal">
+                    <h4 class="mb-0 fw-bold text-primary"><i class="fa-solid fa-folder-open me-2"></i>Thư viện của tôi
+                    </h4>
+                    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#createFolderModal">
                         <i class="fa-solid fa-folder-plus me-1"></i> Tạo thư mục
                     </button>
                 </div>
-                
+
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0 fs-5" id="folder-breadcrumb">
                         <li class="breadcrumb-item active">Thư mục gốc</li>
@@ -61,13 +66,13 @@
                 </p>
 
                 <div id="folders-container" class="row g-3 mb-4">
-                    </div>
+                </div>
 
                 <hr id="folder-divider" class="my-4" style="display: none;">
 
                 <div id="quiz-list-container" class="list-group list-group-flush">
-                    </div>
-                
+                </div>
+
                 <p id="empty-msg" class="text-muted text-center mt-4" style="display: none;">Thư mục trống.</p>
             </div>
         </div>
@@ -76,9 +81,13 @@
     <div class="modal fade" id="viewQuizModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title" id="viewQuizModalLabel">Nội dung</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewQuizModalLabel">Nội dung</h5><button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
+                </div>
                 <div class="modal-body" id="viewQuizModalBody"></div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Đóng</button></div>
             </div>
         </div>
     </div>
@@ -86,12 +95,18 @@
     <div class="modal fade" id="startQuizOptionsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">Tùy chọn</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body">
-                    <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" id="modal-shuffle-questions"><label class="form-check-label">Trộn câu hỏi</label></div>
-                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="modal-shuffle-choices"><label class="form-check-label">Trộn đáp án</label></div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Tùy chọn</h5><button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button class="btn btn-primary" id="start-quiz-button">Bắt đầu!</button></div>
+                <div class="modal-body">
+                    <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox"
+                            id="modal-shuffle-questions"><label class="form-check-label">Trộn câu hỏi</label></div>
+                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox"
+                            id="modal-shuffle-choices"><label class="form-check-label">Trộn đáp án</label></div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button
+                        class="btn btn-primary" id="start-quiz-button">Bắt đầu!</button></div>
             </div>
         </div>
     </div>
@@ -99,11 +114,16 @@
     <div class="modal fade" id="createFolderModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">Tạo thư mục mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body">
-                    <input type="text" class="form-control" id="new-folder-name" placeholder="Nhập tên thư mục (vd: Lịch sử, Toán...)">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tạo thư mục mới</h5><button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button class="btn btn-primary" id="confirm-create-folder">Tạo</button></div>
+                <div class="modal-body">
+                    <input type="text" class="form-control" id="new-folder-name"
+                        placeholder="Nhập tên thư mục (vd: Lịch sử, Toán...)">
+                </div>
+                <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button
+                        class="btn btn-primary" id="confirm-create-folder">Tạo</button></div>
             </div>
         </div>
     </div>
@@ -111,14 +131,79 @@
     <div class="modal fade" id="moveQuizModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">Di chuyển Quiz đến...</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Di chuyển Quiz đến...</h5><button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
+                </div>
                 <div class="modal-body">
                     <p>Chọn thư mục đích:</p>
                     <select class="form-select" id="move-folder-select">
                         <option value="">(Thư mục gốc)</option>
-                        </select>
+                    </select>
                 </div>
-                <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button class="btn btn-primary" id="confirm-move-quiz">Di chuyển</button></div>
+                <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button
+                        class="btn btn-primary" id="confirm-move-quiz">Di chuyển</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="startQuizModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-gear me-2"></i>Cấu hình bài thi</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <h5 id="modal-quiz-title" class="mb-3 text-primary fw-bold">Tên bài Quiz</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Chọn chế độ:</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check card-radio p-0 w-50">
+                                <input class="form-check-input d-none" type="radio" name="quizMode" id="modePractice"
+                                    value="practice" checked>
+                                <label class="form-check-label btn btn-outline-success w-100 p-3" for="modePractice">
+                                    <i class="fa-solid fa-mug-hot fa-2x mb-2"></i><br>
+                                    Luyện tập<br><small>(Không giới hạn)</small>
+                                </label>
+                            </div>
+                            <div class="form-check card-radio p-0 w-50">
+                                <input class="form-check-input d-none" type="radio" name="quizMode" id="modeTimer"
+                                    value="timer">
+                                <label class="form-check-label btn btn-outline-danger w-100 p-3" for="modeTimer">
+                                    <i class="fa-solid fa-stopwatch fa-2x mb-2"></i><br>
+                                    Thi tính giờ<br><small>(Áp lực cao)</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 p-3 bg-light rounded-3">
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="shuffleQuestions" checked>
+                            <label class="form-check-label fw-bold" for="shuffleQuestions">
+                                <i class="fa-solid fa-shuffle me-2 text-primary"></i>Trộn thứ tự câu hỏi
+                            </label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="shuffleAnswers" checked>
+                            <label class="form-check-label fw-bold" for="shuffleAnswers">
+                                <i class="fa-solid fa-list-ol me-2 text-success"></i>Trộn thứ tự đáp án
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="timer-input-section" class="mb-3 d-none">
+                        <label class="form-label fw-bold">Thời gian (phút):</label>
+                        <input type="number" id="quiz-duration" class="form-control" value="15" min="1" max="180">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary px-4 fw-bold" id="btn-confirm-start">Bắt đầu
+                        ngay</button>
+                </div>
             </div>
         </div>
     </div>
@@ -126,4 +211,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/my_quizzes.js" defer></script>
 </body>
+
 </html>

@@ -326,21 +326,28 @@ def update_quiz_title(
     db.refresh(quiz)
     return quiz
 
-# ✅ SỬA API /QUIZ/{QUIZ_ID}
-@app.get("/quiz/{quiz_id}", response_model=schemas.QuizOut)
+# ✅ CẬP NHẬT: Đổi URL thành số nhiều (/quizzes/) để khớp với Frontend mới
+@app.get("/quizzes/{quiz_id}", response_model=schemas.QuizOut)
 def get_quiz_details(
-    quiz_id: int,
-    db: Session = Depends(get_db)
+    quiz_id: int, 
+    db: Session = Depends(get_db),
+    # Có thể thêm current_user nếu muốn bảo mật (chỉ chủ sở hữu mới xem được)
+    current_user: models.User = Depends(get_current_user) 
 ):
     """
     Lấy chi tiết một bộ quiz VÀ các câu hỏi của nó.
     """
     quiz = db.query(models.Quiz).options(
-        joinedload(models.Quiz.questions) # Tải các câu hỏi liên quan
+        joinedload(models.Quiz.questions) # Tải kèm câu hỏi
     ).filter(models.Quiz.id == quiz_id).first()
     
     if not quiz:
         raise HTTPException(status_code=404, detail="Không tìm thấy bộ quiz")
+    
+    # (Tùy chọn) Kiểm tra quyền sở hữu
+    if quiz.owner_id != current_user.id:
+         raise HTTPException(status_code=403, detail="Bạn không có quyền truy cập Quiz này")
+
     return quiz
 
 

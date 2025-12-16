@@ -1,99 +1,300 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Làm Quiz - QuizAI</title>
+    <title>Làm bài thi - QuizAI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/do_quiz.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-bg: #f3f4f6;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --active-color: #667eea;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--secondary-bg);
+            color: #1f2937;
+        }
+
+        /* --- STICKY HEADER --- */
+        .quiz-header {
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .timer-badge {
+            font-family: 'Courier New', monospace;
+            /* Font số điện tử */
+            letter-spacing: 1px;
+            background: #fee2e2;
+            color: #ef4444;
+            transition: all 0.3s ease;
+        }
+
+        /* Chế độ luyện tập thì màu xanh */
+        .timer-badge.practice {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        /* --- CỘT CÂU HỎI --- */
+        .question-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s ease;
+            background: #fff;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .question-card:hover {
+            transform: translateY(-2px);
+            /* Hiệu ứng nhấc nhẹ khi hover */
+        }
+
+        .q-badge {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Style cho Radio Button đẹp */
+        .option-label {
+            display: block;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            background: white;
+        }
+
+        .option-label:hover {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        /* Khi được chọn */
+        .btn-check:checked+.option-label {
+            background-color: #eff6ff;
+            border-color: var(--active-color);
+            color: var(--active-color);
+            font-weight: 500;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .option-key {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            line-height: 26px;
+            text-align: center;
+            border-radius: 50%;
+            background: #f3f4f6;
+            color: #6b7280;
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .btn-check:checked+.option-label .option-key {
+            background: var(--active-color);
+            color: white;
+        }
+
+        /* --- CỘT BÊN PHẢI (SIDEBAR) --- */
+        .sidebar-sticky {
+            position: sticky;
+            top: 100px;
+            /* Cách header 1 đoạn */
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .nav-item-btn {
+            width: 100%;
+            aspect-ratio: 1;
+            border: 1px solid #e5e7eb;
+            background: white;
+            color: #6b7280;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-item-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .nav-item-btn.answered {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+        }
+
+        .nav-item-btn.active {
+            border: 2px solid var(--active-color);
+            color: var(--active-color);
+        }
+
+        /* Nút Nộp bài Gradient */
+        .btn-gradient {
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            transition: opacity 0.3s;
+        }
+
+        .btn-gradient:hover {
+            opacity: 0.9;
+            color: white;
+        }
+
+        /* CSS cho nút chọn chế độ trong Modal */
+        .card-radio .btn-check:checked+.btn-outline-success {
+            background-color: #198754;
+            color: white;
+            box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.5);
+        }
+
+        .card-radio .btn-check:checked+.btn-outline-danger {
+            background-color: #dc3545;
+            color: white;
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.5);
+        }
+    </style>
 </head>
-<body class="bg-light">
-    
-    <nav class="navbar navbar-expand-lg navbar-dark custom-navbar mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="dashboard.html">
-                <i class="fa-solid fa-brain me-2"></i>QuizAI
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="dashboard.html">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">Tạo Quiz</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="my_quizzes.html">Thư viện</a>
-                    </li>
-                </ul>
-                <div class="d-flex align-items-center" id="user-info-nav">
-                    </div>
-            </div>
-        </div>
-    </nav>
 
-    <main class="container mt-4 quiz-container">
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-4">
-                
-                <div id="quiz-result-display" style="display: none;">
-                    <h2 class="h4 text-primary fw-bold mb-3" id="quiz-result-title">
-                        <i class="fa-solid fa-square-poll-vertical me-2"></i>Kết quả
-                    </h2>
-                    <div class="alert alert-info fs-5" id="quiz-score">Bạn đã đúng 0/0 câu.</div>
-                    
-                    <div class="d-flex gap-2 mb-4">
-                        <button class="btn btn-primary" onclick="location.reload()">
-                            <i class="fa-solid fa-rotate-right me-1"></i> Làm lại
-                        </button>
-                        <a href="my_quizzes.html" class="btn btn-outline-secondary">
-                            <i class="fa-solid fa-arrow-left me-1"></i> Quay về thư viện
-                        </a>
-                    </div>
-                    </div>
+<body>
 
-                <div id="quiz-questions-wrapper">
-                    <h2 class="h4 fw-bold text-dark mb-3" id="quiz-title">
-                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                        Đang tải quiz...
-                    </h2>
-                    <hr>
-                    
-                    <p id="quiz-error" class="text-danger fw-bold"></p>
-
-                    <div id="question-container">
-                        <p class="fs-5 fw-medium" id="question-text"></p>
-                        <div id="choices-container" class="mt-4">
-                            </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center mt-5">
-                        <button class="btn btn-outline-secondary px-4" id="prev-button" disabled>
-                            <i class="fa-solid fa-chevron-left me-1"></i> Câu trước
-                        </button>
-                        
-                        <span id="question-counter" class="badge bg-secondary fs-6 rounded-pill">Câu 1 / X</span>
-                        
-                        <button class="btn btn-primary px-4" id="next-button">
-                            Câu tiếp <i class="fa-solid fa-chevron-right ms-1"></i>
-                        </button>
-                        
-                        <button class="btn btn-success px-4" id="submit-button" style="display: none;">
-                            <i class="fa-solid fa-check me-1"></i> Nộp bài
-                        </button>
+    <header class="quiz-header py-3">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="d-flex align-items-center text-truncate" style="max-width: 60%;">
+                    <a href="my_quizzes.html" class="btn btn-light btn-sm rounded-circle shadow-sm me-3 text-secondary">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Đang làm bài</small>
+                        <h5 class="mb-0 fw-bold text-dark text-truncate" id="quiz-title">Đang tải...</h5>
                     </div>
                 </div>
 
+                <div id="timer-box" class="d-flex align-items-center px-3 py-2 rounded-pill timer-badge">
+                    <i class="fa-regular fa-clock me-2"></i>
+                    <span id="timer-display" class="fw-bold fs-5">--:--</span>
+                </div>
+            </div>
+
+            <div class="progress" style="height: 4px; border-radius: 2px;">
+                <div class="progress-bar bg-primary" id="progress-bar" role="progressbar"
+                    style="width: 0%; transition: width 0.5s ease;"></div>
             </div>
         </div>
-    </main>
+    </header>
+
+    <div class="container py-4">
+        <div class="row g-4">
+
+            <div class="col-lg-8" id="questions-container">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Đang tải đề thi...</p>
+                </div>
+            </div>
+
+            <div class="col-lg-4 d-none d-lg-block">
+                <div class="sidebar-sticky">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold text-dark mb-3">
+                                <i class="fa-solid fa-layer-group me-2 text-primary"></i>Mục lục câu hỏi
+                            </h6>
+
+                            <div class="nav-grid mb-4" id="question-nav">
+                            </div>
+
+                            <hr class="text-muted opacity-25">
+
+                            <div class="d-flex justify-content-between mb-3 text-muted" style="font-size: 0.85rem;">
+                                <span><i class="fa-solid fa-square text-secondary opacity-25 me-1"></i> Chưa làm</span>
+                                <span><i class="fa-solid fa-square text-primary me-1"></i> Đã làm</span>
+                            </div>
+
+                            <button class="btn btn-gradient w-100 py-3 rounded-3 fw-bold shadow-sm" id="submit-btn">
+                                <i class="fa-solid fa-paper-plane me-2"></i>NỘP BÀI NGAY
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 d-lg-none mt-3">
+                <button class="btn btn-gradient w-100 py-3 rounded-3 fw-bold shadow-sm"
+                    onclick="document.getElementById('submit-btn').click()">
+                    NỘP BÀI
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="resultModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4 rounded-4 border-0 shadow">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <i class="fa-solid fa-trophy text-warning fa-4x mb-3 animate__animated animate__bounceIn"></i>
+                        <h2 class="fw-bold text-primary">Kết Quả</h2>
+                    </div>
+                    <div class="row g-3 justify-content-center mb-4">
+                        <div class="col-4">
+                            <div class="p-3 bg-light rounded-3">
+                                <div class="text-muted small fw-bold">ĐIỂM SỐ</div>
+                                <h3 class="fw-bold text-dark mb-0" id="result-score">--</h3>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-3 bg-light rounded-3">
+                                <div class="text-muted small fw-bold">ĐÚNG</div>
+                                <h3 class="fw-bold text-success mb-0" id="result-correct">--</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary w-100 py-2 fw-bold" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-magnifying-glass me-2"></i>Xem lại bài làm
+                    </button>
+                    <a href="my_quizzes.html" class="btn btn-link text-muted mt-2 text-decoration-none">Thoát ra</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/do_quiz.js" defer></script>
+    <script src="js/do_quiz.js"></script>
 </body>
+
 </html>

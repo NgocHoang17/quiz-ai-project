@@ -6,12 +6,12 @@ const backContent = document.getElementById('card-back-content');
 const quizTitleElem = document.getElementById('quiz-title');
 const counterElem = document.getElementById('card-counter');
 
-// === HÀM TIỆN ÍCH (Mới thêm để tránh lỗi hiển thị) ===
+// === HÀM TIỆN ÍCH ===
 function escapeHTML(str) {
-  if (typeof str !== 'string') return '';
-  return str.replace(/[&<>"']/g, function(m) {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-  });
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+    });
 }
 
 function shuffleArray(array) {
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (!quizId) { alert("Không tìm thấy Quiz ID"); return; }
 
     // 3. Tải dữ liệu
-    await loadQuizData(quizId);
+    await loadQuizData(quizId, token); // ✅ Gửi token qua
 
     // 4. Sự kiện Lật thẻ
     flashcard.addEventListener('click', function() {
@@ -59,17 +59,24 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 });
 
-async function loadQuizData(id) {
+async function loadQuizData(id, token) {
     try {
-        const response = await fetch(`http://127.0.0.1:8000/quiz/${id}`);
-        if (!response.ok) throw new Error('Lỗi tải quiz');
+        // ✅ Sửa đường dẫn API thành /quizzes/ để khớp với Backend
+        const response = await fetch(`http://127.0.0.1:8000/quizzes/${id}`, { 
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            // Lỗi 403, 404, 500
+            throw new Error(`Lỗi tải quiz: ${response.status}`);
+        }
         
         const data = await response.json();
         allQuestions = data.questions;
         quizTitleElem.innerText = "Học: " + data.title;
 
         if (allQuestions.length === 0) {
-            frontContent.innerText = "Quiz này chưa có câu hỏi.";
+            frontContent.innerHTML = "<h4 class='text-muted'>Quiz này chưa có câu hỏi.</h4>";
             return;
         }
 
@@ -77,11 +84,11 @@ async function loadQuizData(id) {
 
     } catch (err) {
         console.error(err);
-        frontContent.innerText = "Lỗi kết nối server.";
+        frontContent.innerHTML = "<h4 class='text-danger'>Lỗi kết nối server hoặc quiz không tồn tại.</h4>";
     }
 }
 
-// === ✅ CẬP NHẬT HÀM NÀY ĐỂ HIỂN THỊ 4 ĐÁP ÁN ===
+// === CẬP NHẬT HÀM RENDER NÀY ĐỂ HIỂN THỊ 4 ĐÁP ÁN + GIẢI THÍCH ===
 function renderCard() {
     const q = allQuestions[currentIndex];
     
@@ -89,10 +96,10 @@ function renderCard() {
     let frontHTML = `
         <div class="flashcard-question-text">${escapeHTML(q.question_text)}</div>
         
-        <div class="flashcard-options">
-            <div class="option-item"><strong>A.</strong> ${escapeHTML(q.choice_a)}</div>
-            <div class="option-item"><strong>B.</strong> ${escapeHTML(q.choice_b)}</div>
-            <div class="option-item"><strong>C.</strong> ${escapeHTML(q.choice_c)}</div>
+        <div class="flashcard-options mt-4 p-3 bg-light rounded">
+            <div class="option-item mb-1"><strong>A.</strong> ${escapeHTML(q.choice_a)}</div>
+            <div class="option-item mb-1"><strong>B.</strong> ${escapeHTML(q.choice_b)}</div>
+            <div class="option-item mb-1"><strong>C.</strong> ${escapeHTML(q.choice_c)}</div>
             <div class="option-item"><strong>D.</strong> ${escapeHTML(q.choice_d)}</div>
         </div>
     `;
@@ -101,21 +108,24 @@ function renderCard() {
     // --- 2. MẶT SAU: ĐÁP ÁN ĐÚNG + GIẢI THÍCH ---
     // Tìm nội dung text của đáp án đúng
     let correctAnswerText = "";
-    if (q.correct_answer === 'A') correctAnswerText = q.choice_a;
-    else if (q.correct_answer === 'B') correctAnswerText = q.choice_b;
-    else if (q.correct_answer === 'C') correctAnswerText = q.choice_c;
-    else if (q.correct_answer === 'D') correctAnswerText = q.choice_d;
+    const correctKey = q.correct_answer;
+    const keyMap = { 'A': q.choice_a, 'B': q.choice_b, 'C': q.choice_c, 'D': q.choice_d };
+    correctAnswerText = keyMap[correctKey] || "N/A";
+    
 
     let backHTML = `
-        <span class="correct-answer-highlight">${q.correct_answer}: ${escapeHTML(correctAnswerText)}</span>
+        <div class="bg-success text-white p-3 rounded mb-3">
+            <h4 class="mb-0">ĐÁP ÁN: ${correctKey}</h4>
+            <p class="mb-0 small fw-light">${escapeHTML(correctAnswerText)}</p>
+        </div>
+        <hr>
+        <p class="fs-6 mt-3 text-start">
+            <strong><i class="fa-solid fa-lightbulb me-2 text-warning"></i>Giải thích:</strong><br>
+            ${escapeHTML(q.explanation || 'Chưa có giải thích chi tiết.')}
+        </p>
+        ${q.citation ? `<p class="small text-muted fst-italic mt-3"><i class="fa-solid fa-quote-left me-1"></i> Trích dẫn: ${escapeHTML(q.citation)}</p>` : ''}
     `;
     
-    if (q.explanation && q.explanation !== "Không có giải thích") {
-        backHTML += `<hr><p class="fs-6 mt-2 text-start">${escapeHTML(q.explanation)}</p>`;
-    } else {
-        backHTML += `<hr><p class="fs-6 mt-2 text-muted fst-italic">Chưa có giải thích chi tiết.</p>`;
-    }
-
     backContent.innerHTML = backHTML;
 
     // Cập nhật bộ đếm
@@ -124,30 +134,21 @@ function renderCard() {
 
 function nextCard() {
     if (currentIndex < allQuestions.length - 1) {
-        if (flashcard.classList.contains('flipped')) {
-            flashcard.classList.remove('flipped');
-            setTimeout(() => {
-                currentIndex++;
-                renderCard();
-            }, 300);
-        } else {
+        // Luôn lật về mặt trước khi chuyển bài
+        flashcard.classList.remove('flipped');
+        setTimeout(() => {
             currentIndex++;
             renderCard();
-        }
+        }, 300); // Đợi hiệu ứng lật xong (hoặc không cần timeout nếu bỏ hiệu ứng)
     }
 }
 
 function prevCard() {
     if (currentIndex > 0) {
-        if (flashcard.classList.contains('flipped')) {
-            flashcard.classList.remove('flipped');
-            setTimeout(() => {
-                currentIndex--;
-                renderCard();
-            }, 300);
-        } else {
+        flashcard.classList.remove('flipped');
+        setTimeout(() => {
             currentIndex--;
             renderCard();
-        }
+        }, 300);
     }
 }
