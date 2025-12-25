@@ -8,9 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
-</head>
+    
+    <link rel="stylesheet" href="css/style.css">      <link rel="stylesheet" href="css/dashboard.css">  </head>
 
 <body class="bg-light">
 
@@ -33,11 +32,10 @@
 
     <main class="container pb-5">
 
-        <div class="dashboard-hero d-flex justify-content-between align-items-center">
+        <div class="dashboard-hero d-flex justify-content-between align-items-center mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 1rem;">
             <div>
-                <h2 id="welcome-message">Xin chào, Học viên! 👋</h2>
-                <p class="mb-0 opacity-75">"Học tập là hạt giống của kiến thức, kiến thức là hạt giống của hạnh phúc."
-                </p>
+                <h2 id="welcome-message" class="fw-bold">Xin chào, Học viên! 👋</h2>
+                <p class="mb-0 opacity-75">"Học tập là hạt giống của kiến thức, kiến thức là hạt giống của hạnh phúc."</p>
                 <div class="mt-4">
                     <a href="index.html" class="btn btn-light text-primary fw-bold px-4 rounded-pill shadow-sm">
                         <i class="fa-solid fa-plus me-2"></i>Tạo Quiz Mới
@@ -54,66 +52,150 @@
 
         <div class="row g-4 mb-4">
             <div class="col-md-3">
-                <div class="stat-card blue-accent">
-                    <p>Tổng số Quiz</p>
-                    <h3 id="stat-total-quizzes">0</h3>
-                    <i class="fa-solid fa-layer-group stat-icon text-primary"></i>
+                <div class="stat-card p-3 h-100 d-flex flex-row align-items-center">
+                    <div class="icon-box bg-primary bg-opacity-10 text-primary">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0 fw-bold" id="stat-total-quiz">0</h3>
+                        <small class="text-muted">Tổng Quiz</small>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="stat-card green-accent">
-                    <p>Câu hỏi đã ôn</p>
-                    <h3 id="stat-total-questions">0</h3>
-                    <i class="fa-solid fa-check-double stat-icon text-success"></i>
+                <div class="stat-card p-3 h-100 d-flex flex-row align-items-center">
+                    <div class="icon-box bg-success bg-opacity-10 text-success">
+                        <i class="fa-solid fa-check-double"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0 fw-bold" id="stat-total-completed">0</h3>
+                        <small class="text-muted">Lần làm bài</small>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="stat-card orange-accent">
-                    <p>Số câu đúng</p>
-                    <h3 id="stat-total-correct">0</h3>
-                    <i class="fa-solid fa-star stat-icon text-warning"></i>
+                <div class="stat-card p-3 h-100 d-flex flex-row align-items-center">
+                    <div class="icon-box bg-warning bg-opacity-10 text-warning">
+                        <i class="fa-solid fa-folder"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0 fw-bold" id="stat-total-folders">0</h3>
+                        <small class="text-muted">Thư mục</small>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="stat-card red-accent">
-                    <p>Tỉ lệ chính xác</p>
-                    <h3 id="stat-accuracy">0%</h3>
-                    <i class="fa-solid fa-bullseye stat-icon text-danger"></i>
+                <div class="stat-card p-3 h-100 d-flex flex-row align-items-center">
+                    <div class="icon-box bg-danger bg-opacity-10 text-danger">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0 fw-bold" id="stat-total-favorites">0</h3>
+                        <small class="text-muted">Yêu thích</small>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="row g-4">
-            <div class="col-lg-8">
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <div class="chart-title">
-                            <i class="fa-solid fa-chart-line me-2 text-primary"></i>Hoạt động học tập
-                        </div>
-                        <select class="form-select form-select-sm w-auto border-0 bg-light fw-bold text-secondary"
-                            id="chart-period-select">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="table-card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div><i class="fa-solid fa-chart-line me-2 text-primary"></i>Hoạt động học tập</div>
+                        <select class="form-select form-select-sm w-auto border-0 bg-light fw-bold text-secondary" id="chart-period">
                             <option value="week" selected>7 ngày qua</option>
                             <option value="month">30 ngày qua</option>
                         </select>
                     </div>
-                    <div style="height: 300px;">
-                        <canvas id="activityChart"></canvas>
+                    <div class="card-body">
+                        <div class="chart-container-wrapper">
+                            <canvas id="activityChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="col-lg-4">
-                <div class="chart-container mb-4" style="height: auto;">
-                    <div class="chart-title mb-3 text-center">Tỷ lệ Đúng / Sai</div>
-                    <div style="height: 200px; width: 200px; margin: 0 auto;">
-                        <canvas id="accuracyChart"></canvas>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="table-card">
+                    <div class="card-header border-bottom-0 pb-0">
+                        <i class="fa-solid fa-clock-rotate-left me-2 text-info"></i>Lịch sử làm bài gần nhất
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">Tên Quiz</th>
+                                        <th>Câu hỏi</th>
+                                        <th>Điểm số</th>
+                                        <th>Ngày làm</th>
+                                        <th class="text-end pe-4">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-list">
+                                    <tr><td colspan="5" class="text-center text-muted py-4">Đang tải dữ liệu...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="chart-container" style="height: auto;">
-                    <div class="chart-title mb-3">Vừa làm gần đây</div>
-                    <div id="recent-quiz-list" class="activity-list">
-                        <div class="text-center text-muted py-3">Đang tải...</div>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="table-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div><i class="fa-solid fa-file-circle-plus me-2 text-success"></i>Đề mới tạo</div>
+                        <a href="index.html" class="btn btn-sm btn-success fw-bold rounded-pill px-3">
+                            <i class="fa-solid fa-plus me-1"></i>Tạo mới
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">Tên Quiz</th>
+                                        <th>Số câu</th>
+                                        <th>Loại</th>
+                                        <th>Ngày tạo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-created-list">
+                                    <tr><td colspan="4" class="text-center text-muted py-4">Đang tải dữ liệu...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="table-card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-heart me-2 text-danger"></i>Đề yêu thích
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">Tên Quiz</th>
+                                        <th>Số câu</th>
+                                        <th>Loại</th>
+                                        <th class="text-end pe-4">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="favorites-list">
+                                    <tr><td colspan="4" class="text-center text-muted py-4">Đang tải dữ liệu...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -121,8 +203,76 @@
 
     </main>
 
+    <div class="modal fade" id="startQuizModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-gear me-2"></i>Cấu hình bài thi</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <h5 id="modal-quiz-title" class="mb-3 text-primary fw-bold">...</h5>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Chọn chế độ:</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check card-radio p-0 w-50">
+                                <input class="form-check-input d-none" type="radio" name="quizMode" id="modePractice" value="practice" checked>
+                                <label class="form-check-label btn btn-outline-success w-100 p-3" for="modePractice">
+                                    <i class="fa-solid fa-mug-hot fa-2x mb-2"></i><br>Luyện tập
+                                </label>
+                            </div>
+                            <div class="form-check card-radio p-0 w-50">
+                                <input class="form-check-input d-none" type="radio" name="quizMode" id="modeTimer" value="timer">
+                                <label class="form-check-label btn btn-outline-danger w-100 p-3" for="modeTimer">
+                                    <i class="fa-solid fa-stopwatch fa-2x mb-2"></i><br>Thi tính giờ
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 p-3 bg-light rounded-3">
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="shuffleQuestions" checked>
+                            <label class="form-check-label fw-bold" for="shuffleQuestions">Trộn câu hỏi</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="shuffleAnswers" checked>
+                            <label class="form-check-label fw-bold" for="shuffleAnswers">Trộn đáp án</label>
+                        </div>
+                    </div>
+
+                    <div id="timer-input-section" class="mb-3 d-none">
+                        <label class="form-label fw-bold">Thời gian (phút):</label>
+                        <input type="number" id="quiz-duration" class="form-control" value="15" min="1" max="180">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary px-4 fw-bold" id="btn-confirm-start">Bắt đầu ngay</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="viewQuizModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="viewQuizModalLabel">Xem trước</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" id="viewQuizModalBody">
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/dashboard.js" defer></script>
+    <script src="js/dashboard.js"></script>
 </body>
 
 </html>

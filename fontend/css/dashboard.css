@@ -1,118 +1,48 @@
-/* === DASHBOARD HERO SECTION === */
-.dashboard-hero {
-    background: linear-gradient(135deg, #667eea 0%, #3d50d0 100%);
-    border-radius: 15px;
-    padding: 2.5rem;
-    color: white;
-    box-shadow: 0 10px 25px rgba(118, 75, 162, 0.3);
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 2rem;
-}
-
-/* Hiệu ứng hình tròn mờ trang trí nền */
-.dashboard-hero::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -10%;
-    width: 300px;
-    height: 300px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-}
-
-.dashboard-hero h2 {
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-}
-
-/* === STATS CARDS (THẺ THỐNG KÊ) === */
+/* === 1. STAT CARDS (Thẻ thống kê) === */
 .stat-card {
     border: none;
-    border-radius: 15px;
-    padding: 1.5rem;
-    position: relative;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    transition: transform 0.2s;
+    background: white;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    height: 100%;
-    background: rgb(228, 246, 243);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
+.stat-card:hover { transform: translateY(-3px); }
 
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-}
-
-.stat-card .stat-icon {
-    font-size: 3rem;
-    position: absolute;
-    right: -10px;
-    bottom: -10px;
-    opacity: 0.15; /* Làm mờ icon để làm nền */
-    transform: rotate(-15deg);
-}
-
-.stat-card h3 {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin-bottom: 0;
-    color: #2d3436;
-}
-
-.stat-card p {
-    color: #636e72;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    margin-bottom: 0.5rem;
-    letter-spacing: 1px;
-}
-
-/* Màu sắc riêng cho từng thẻ */
-.stat-card.blue-accent { border-left: 5px solid #0984e3; }
-.stat-card.green-accent { border-left: 5px solid #00b894; }
-.stat-card.orange-accent { border-left: 5px solid #fdcb6e; }
-.stat-card.red-accent { border-left: 5px solid #ff7675; }
-
-/* === CHARTS CONTAINER === */
-.chart-container {
-    background: rgb(237, 240, 242);
-    border-radius: 15px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    height: 100%;
-}
-
-.chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-}
-
-.chart-title {
-    font-weight: 700;
-    color: #2d3436;
-    font-size: 1.1rem;
-}
-
-/* === ACTIVITY LIST === */
-.activity-list .list-group-item {
-    border: none;
-    border-bottom: 1px solid #f1f2f6;
-    padding: 1rem 0;
-}
-.activity-list .list-group-item:last-child {
-    border-bottom: none;
-}
-.activity-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Icon box trong thẻ stat */
+.icon-box {
+    width: 50px; height: 50px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
     margin-right: 15px;
 }
+
+/* === 2. TABLE & CHART CARDS === */
+.table-card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    background: white;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+.table-card .card-header {
+    background: white;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 18px 25px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #2c3e50;
+}
+
+/* Chiều cao biểu đồ thấp lại */
+.chart-container-wrapper {
+    height: 320px;
+    position: relative;
+    width: 100%;
+}
+
+/* Tùy chỉnh bảng */
+.table > :not(caption) > * > * { padding: 1rem 1.5rem; }
+.table-hover tbody tr:hover { background-color: #f8f9fa; }

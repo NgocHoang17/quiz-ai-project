@@ -38,23 +38,36 @@ class QuestionOut(QuestionBase):
 
 # --- Schemas cho Quiz (CẬP NHẬT) ---
 class QuizBase(BaseModel):
-    title: Optional[str] = "Bộ quiz mới"
-
+    title: str
+    folder_id: Optional[int] = None
+    quiz_type: str = "mcq"
+    
 class QuizCreate(QuizBase):
     questions: List[QuestionCreate]
-    # ✅ Thêm trường này để lưu quiz vào folder (nếu có)
-    folder_id: Optional[int] = None 
 
 class QuizOut(QuizBase):
     id: int
-    owner_id: int
     created_at: datetime
-    # ✅ Thêm trường này để trả về cho frontend biết nó nằm ở đâu
-    folder_id: Optional[int] = None 
-    questions: List[QuestionOut] = []
-
+    owner_id: int
+    is_favorite: bool = False #  Mới
+    questions: List[QuestionOut] = [] 
+    
     class Config:
-        from_attributes = True
+        orm_mode = True
+
+# --- Schema Kết quả làm bài ---
+class QuizResultCreate(BaseModel):
+    score: int
+    total_questions: int
+
+class QuizResultOut(BaseModel):
+    id: int
+    quiz_title: str # Sẽ map thủ công hoặc dùng hybrid property
+    score: int
+    total_questions: int
+    completed_at: datetime
+    class Config:
+        orm_mode = True
 
 # --- Schema cho việc di chuyển Quiz (MỚI) ---
 class MoveQuizSchema(BaseModel):

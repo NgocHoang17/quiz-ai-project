@@ -80,10 +80,6 @@ function setupDragAndDrop() {
         if (files.length > 0) {
             // Gán file vừa thả vào ô input
             fileInput.files = files;
-            // (Tùy chọn) Thông báo tên file đã chọn lên giao diện nếu cần
-            // Hiện tại input type="file" của Bootstrap sẽ tự hiển thị tên file nếu click, 
-            // nhưng khi drop thì nó không tự update text hiển thị.
-            // Ta có thể alert nhẹ hoặc console log để biết.
             console.log("Đã nhận file:", files[0].name);
         }
     }
@@ -96,7 +92,7 @@ generateButton.addEventListener('click', function() {
     const numQuestions = parseInt(quizCountInput.value);
     const quizType = quizTypeSelect.value;
     
-    if (isNaN(numQuestions) || numQuestions < 1 || numQuestions > 20) {
+    if (isNaN(numQuestions) || numQuestions < 1 || numQuestions > 25) {
         alert("Vui lòng nhập số lượng câu hỏi hợp lệ (1-20).");
         return;
     }
@@ -227,12 +223,16 @@ saveQuizButton.addEventListener('click', async function() {
     }
 });
 
+// XỬ LÝ LƯU QUIZ 
 document.getElementById('confirm-save-quiz-btn').addEventListener('click', async function() {
     const token = localStorage.getItem('quizAIToken');
     
     const titleInput = document.getElementById('save-quiz-title-input');
     const folderSelect = document.getElementById('save-quiz-folder-select');
     
+    const quizTypeSelect = document.getElementById('quiz-type');
+    const currentQuizType = quizTypeSelect ? quizTypeSelect.value : 'mcq';
+
     const quizTitle = titleInput.value.trim() || "Quiz mới";
     const folderIdVal = folderSelect.value;
     const folderId = folderIdVal === "" ? null : parseInt(folderIdVal);
@@ -240,6 +240,7 @@ document.getElementById('confirm-save-quiz-btn').addEventListener('click', async
     const dataToSave = {
         title: quizTitle,
         folder_id: folderId, 
+        quiz_type: currentQuizType, 
         questions: currentQuizData.map(q => ({
             question_text: q.cau_hoi,
             choice_a: q.lua_chon.A,
@@ -268,7 +269,14 @@ document.getElementById('confirm-save-quiz-btn').addEventListener('click', async
 
         if (response.ok) { 
             const savedQuiz = await response.json();
-            saveQuizMessage.innerText = ` Đã lưu thành công bộ quiz: "${savedQuiz.title}"`;
+            
+            // Format tên loại quiz cho đẹp khi thông báo
+            let typeLabel = "Trắc nghiệm";
+            if (currentQuizType === 'fill_in_blank') typeLabel = "Điền khuyết";
+            else if (currentQuizType === 'exercise') typeLabel = "Bài tập";
+            else if (currentQuizType === 'mixed') typeLabel = "Hỗn hợp";
+
+            saveQuizMessage.innerText = `✅ Đã lưu thành công: "${savedQuiz.title}" (${typeLabel})`;
             saveQuizMessage.className = 'text-success';
             saveQuizButton.style.display = 'none'; 
         } else if (response.status === 401) {

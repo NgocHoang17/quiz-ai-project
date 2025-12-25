@@ -1,6 +1,8 @@
-/* CSS chung */
+/* =========================================
+   1. CSS CƠ BẢN & FORM
+   ========================================= */
 body { 
-    background-color: #fafde1; /* Màu nền tùy chỉnh #fafde1*/
+    background-color: #fafde1; 
 }
 
 /* Tùy chỉnh Textarea */
@@ -9,16 +11,11 @@ textarea {
     height: 200px; 
     margin-bottom: 10px; 
     padding: 10px; 
-    border: 1px solid #ccc; /*#ccc*/
+    border: 1px solid #ccc;
     border-radius: 5px; 
 }
 
-/* Tùy chỉnh font cho Navbar */
-.navbar-brand {
-    font-weight: bold;
-}
-
-/* CSS cho thông báo loading & save */
+/* Thông báo loading & save */
 #loading { 
     display: none; 
     color: #0d6efd; 
@@ -29,7 +26,9 @@ textarea {
     font-size: 0.95rem;
 }
 
-/* CSS chung cho .quiz-question */
+/* =========================================
+   2. QUIZ & QUESTION STYLES
+   ========================================= */
 .quiz-question {
     background-color: #fdfdfd;
     border: 1px solid #ddd;
@@ -57,7 +56,7 @@ textarea {
     font-weight: bold;
 }
 
-/* Tinh chỉnh cho danh sách Quiz */
+/* Tinh chỉnh cho danh sách Quiz (Trong My Quizzes) */
 .list-group-item h5 {
     color: #0d6efd; 
 }
@@ -71,27 +70,29 @@ textarea {
     background-color: #fdfdfd;
 }
 
-/* === CSS CHO TÍNH NĂNG FOLDER  === */
+/* =========================================
+   3. FOLDER STYLES
+   ========================================= */
 .folder-card {
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
-    border: 2px solid #ffc107; /* Viền nhẹ */
-    background-color: #fff9db; /* Nền trắng */
-    border-left: 6px solid #ffc107; /* Điểm nhấn màu vàng bên trái */
+    border: 2px solid #ffc107;
+    background-color: #fff9db;
+    border-left: 6px solid #ffc107;
 }
 
 .folder-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    background-color: #fff2b1; /* Nền vàng nhạt khi hover */
+    background-color: #fff2b1;
 }
 
 .folder-icon {
     font-size: 2.5rem;
-    color: #ffc107; /* Màu vàng đặc trưng của thư mục */
+    color: #ffc107;
 }
 
-/* Breadcrumb (Thanh đường dẫn) */
+/* Breadcrumb */
 .breadcrumb-item a {
     text-decoration: none;
     color: #0d6efd;
@@ -101,72 +102,59 @@ textarea {
     color: #6c757d;
 }
 
-
-/* === NAVBAR HIỆN ĐẠI (MODERN NAVBAR) === */
-
-/* 1. Tạo nền Gradient và đổ bóng */
+/* =========================================
+   4. MODERN NAVBAR
+   ========================================= */
 .custom-navbar {
-    /* Màu nền chuyển từ Xanh đậm sang Tím */
     background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%); 
-    /* Hoặc màu này nếu bạn thích style Facebook/Messenger: 
-       background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%); 
-    */
-    
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ tạo chiều sâu */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     padding-top: 0.8rem;
     padding-bottom: 0.8rem;
 }
 
-/* 2. Tùy chỉnh Logo */
 .custom-navbar .navbar-brand {
     font-size: 1.5rem;
-    font-weight: 800; /* Chữ đậm hơn */
-    letter-spacing: 1px; /* Giãn chữ nhẹ */
+    font-weight: 800;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.2); /* Bóng chữ */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
 
-/* 3. Tùy chỉnh các đường link */
 .custom-navbar .nav-link {
     font-weight: 500;
     padding: 8px 15px !important;
-    border-radius: 20px; /* Bo tròn nút */
-    transition: all 0.3s ease; /* Hiệu ứng mượt */
+    border-radius: 20px;
+    transition: all 0.3s ease;
     margin-right: 5px;
 }
 
-/* Hiệu ứng khi di chuột vào link */
 .custom-navbar .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.2); /* Nền trắng mờ */
-    transform: translateY(-2px); /* Nổi lên nhẹ */
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
     color: #fff !important;
 }
 
-/* Link đang Active (Trang hiện tại) */
 .custom-navbar .nav-link.active {
-    background-color: rgba(255, 255, 255, 0.3); /* Nền trắng đậm hơn */
+    background-color: rgba(255, 255, 255, 0.3);
     color: #fff !important;
     font-weight: bold;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* Nút Đăng xuất */
 .custom-navbar .btn-outline-light {
     border-width: 2px;
     background-color: #fb8b95;
     font-weight: bold;
 }
 .custom-navbar .btn-outline-light:hover {
-    background-color: #ff4757; /* Màu đỏ khi hover logout */
+    background-color: #ff4757;
     border-color: #ff4757;
     color: white;
 }
 
-
-
-/* === CSS CHO TRANG TẠO QUIZ (INDEX.HTML) === */
-
-/* Tùy chỉnh Tabs để trông hiện đại hơn */
+/* =========================================
+   5. TRANG TẠO QUIZ (INDEX.HTML)
+   ========================================= */
 .nav-tabs .nav-link {
     color: #495057;
     border: none;
@@ -185,10 +173,9 @@ textarea {
 .nav-tabs .nav-link:hover {
     color: #4c89df;
     border-color: transparent;
-    isolation: isolate; /* Fix lỗi render trên một số trình duyệt */
+    isolation: isolate;
 }
 
-/* Khu vực Upload File (Viền nét đứt) */
 .upload-area {
     border: 2px dashed #dee2e6;
     border-radius: 10px;
@@ -202,17 +189,59 @@ textarea {
     cursor: pointer;
 }
 
-/* Khu vực Kết quả */
+.upload-area.active {
+    background-color: #e9ecef;
+    border-color: #0d6efd;
+    border-style: solid;
+    transform: scale(1.02);
+}
+
 .result-area {
     background-color: #deeff1;
     border-radius: 10px;
     border: 1px solid #e9ecef;
 }
 
-/* === CSS CHO KÉO THẢ FILE === */
-.upload-area.active {
-    background-color: #e9ecef; /* Màu xám đậm hơn chút */
-    border-color: #0d6efd; /* Viền xanh */
-    border-style: solid; /* Đổi từ nét đứt sang nét liền */
-    transform: scale(1.02); /* Phóng to nhẹ */
+/* =========================================
+   6. [QUAN TRỌNG] MODAL CHỌN CHẾ ĐỘ 
+   (Sửa lỗi không hiện màu khi chọn)
+   ========================================= */
+   
+/* Ẩn nút radio mặc định */
+.card-radio input.form-check-input {
+    display: none; 
+}
+
+/* Label mặc định (chưa chọn) */
+.card-radio label {
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+/* ✅ KHI CHỌN LUYỆN TẬP: NỀN XANH LÁ */
+#modePractice:checked + label {
+    background-color: #198754 !important;
+    color: white !important;
+    border-color: #198754 !important;
+    box-shadow: 0 4px 10px rgba(25, 135, 84, 0.4);
+    transform: scale(1.02);
+}
+
+/* ✅ KHI CHỌN TÍNH GIỜ: NỀN ĐỎ */
+#modeTimer:checked + label {
+    background-color: #dc3545 !important;
+    color: white !important;
+    border-color: #dc3545 !important;
+    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4);
+    transform: scale(1.02);
+}
+
+/* =========================================
+   7. UTILS
+   ========================================= */
+.chart-container-wrapper {
+    height: 320px;
+    position: relative;
+    width: 100%;
 }

@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 time = durationInput ? durationInput.value : 15;
             }
             
-            // ✅ LẤY TÙY CHỌN TRỘN (MỚI)
+            // Lấy tùy chọn trộn
             const shuffleQ = document.getElementById('shuffleQuestions').checked ? 1 : 0;
             const shuffleA = document.getElementById('shuffleAnswers').checked ? 1 : 0;
             
@@ -138,17 +138,33 @@ function renderCurrentView() {
     emptyMsg.style.display = (!hasFolders && quizzesInView.length === 0) ? 'block' : 'none';
 }
 
+// ✅ CẬP NHẬT: HÀM TẠO HTML QUIZ (CÓ NÚT TRÁI TIM)
 function createQuizElement(quiz) {
     const quizItem = document.createElement('div');
     quizItem.id = `quiz-item-${quiz.id}`;
     quizItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
     const timeAgo = formatTimeAgo(quiz.created_at);
 
+    // Xác định icon trái tim (Đỏ nếu true, Xám viền nếu false)
+    const heartIcon = quiz.is_favorite ? 'fa-solid fa-heart text-danger' : 'fa-regular fa-heart text-muted';
+
     quizItem.innerHTML = `
-        <div class="flex-grow-1" onclick="viewQuiz(${quiz.id})" style="cursor: pointer;">
-            <h5 class="mb-1 text-primary fw-bold text-decoration-none"><i class="fa-regular fa-file-lines me-2"></i>${escapeHTML(quiz.title)}</h5>
-            <small class="text-muted"><i class="fa-solid fa-layer-group me-1"></i> ${quiz.questions.length} câu &bull; <i class="fa-regular fa-clock me-1"></i> ${timeAgo}</small>
+        <div class="flex-grow-1 d-flex align-items-center gap-3">
+            <button class="btn btn-link p-0 text-decoration-none" onclick="toggleFavorite(event, ${quiz.id})" title="Yêu thích">
+                <i class="${heartIcon} fs-4" id="fav-icon-${quiz.id}"></i>
+            </button>
+
+            <div onclick="viewQuiz(${quiz.id})" style="cursor: pointer;" class="flex-grow-1">
+                <h5 class="mb-1 text-primary fw-bold text-decoration-none">
+                    <i class="fa-regular fa-file-lines me-2"></i>${escapeHTML(quiz.title)}
+                </h5>
+                <small class="text-muted">
+                    <i class="fa-solid fa-layer-group me-1"></i> ${quiz.questions.length} câu &bull; 
+                    <i class="fa-regular fa-clock me-1"></i> ${timeAgo}
+                </small>
+            </div>
         </div>
+        
         <div class="d-flex align-items-center gap-2">
             <button onclick="openStartModal(${quiz.id}, '${escapeHTML(quiz.title)}')" class="btn btn-primary btn-sm"><i class="fa-solid fa-play me-1"></i> Làm bài</button>
             <div class="dropdown">
@@ -262,6 +278,35 @@ async function deleteQuiz(id) {
 }
 
 function downloadDocx(quizId) { window.location.href = `http://127.0.0.1:8000/quizzes/${quizId}/export/docx`; }
+
+// ✅ MỚI THÊM: HÀM TOGGLE FAVORITE
+async function toggleFavorite(event, quizId) {
+    event.stopPropagation(); // Ngăn click vào xem chi tiết
+    const token = localStorage.getItem('quizAIToken');
+    const icon = document.getElementById(`fav-icon-${quizId}`);
+    
+    // Hiệu ứng giả lập ngay lập tức cho mượt
+    const isCurrentlyFav = icon.classList.contains('fa-solid');
+    if (isCurrentlyFav) {
+        icon.className = 'fa-regular fa-heart text-muted fs-4';
+    } else {
+        icon.className = 'fa-solid fa-heart text-danger fs-4 animate__animated animate__heartBeat';
+    }
+
+    try {
+        await fetch(`http://127.0.0.1:8000/quizzes/${quizId}/favorite`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        // Cập nhật lại dữ liệu cục bộ
+        const quiz = allQuizzes.find(q => q.id === quizId);
+        if (quiz) quiz.is_favorite = !quiz.is_favorite;
+    } catch (err) { 
+        console.error(err);
+        // Hoàn tác nếu lỗi
+        icon.className = isCurrentlyFav ? 'fa-solid fa-heart text-danger fs-4' : 'fa-regular fa-heart text-muted fs-4';
+    }
+}
 
 function escapeHTML(str) { if (typeof str !== 'string') return ''; return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#039;'}[m])); }
 function formatTimeAgo(dateString) { return "Vừa xong"; } // Giữ gọn, bạn có thể dùng hàm format cũ

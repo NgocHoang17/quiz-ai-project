@@ -1,19 +1,18 @@
 from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session, joinedload  
-from sqlalchemy import func
+from sqlalchemy.orm import Session, joinedload 
+from sqlalchemy import func, desc # ✅ Thêm desc để sắp xếp giảm dần
 from typing import List, Optional
 from datetime import timedelta
 import io
 import fitz
 import docx
 from pptx import Presentation
-from fastapi.responses import StreamingResponse #  Cần thêm cái này để trả về file
-from docx.shared import Pt # Để chỉnh cỡ chữ
-from docx.enum.text import WD_ALIGN_PARAGRAPH # Để căn lề
-from datetime import datetime, timedelta, date # Thêm date, timedelta
-from sqlalchemy import func # Để so sánh ngày trong SQL
+from fastapi.responses import StreamingResponse 
+from docx.shared import Pt 
+from docx.enum.text import WD_ALIGN_PARAGRAPH 
+from datetime import datetime, timedelta, date 
 
 # Import các file .py của bạn
 from . import models, schemas, security
@@ -114,7 +113,7 @@ def _generate_quiz_from_text(text: str, num_questions: int, quiz_type: str):
         "mcq": "Trắc nghiệm 4 lựa chọn (A, B, C, D).",
         "fill_in_blank": "Trắc nghiệm dạng điền vào chỗ trống. Câu hỏi phải có một đến hai dấu '____' ở các vị trí quan trong trong câu trích dẫn để điền.",
         "exercise": "Câu hỏi dạng bài tập vận dụng hoặc giải quyết vấn đề dựa trên nội dung.(không cung cấp kí hiệu cho công thức và không giải thích dài dòng)",
-        "mixed": "Hỗn hợp nhiều dạng câu hỏi (trắc nghiệm, điền khuyết, bài tập)."
+        "mixed": "Hỗn hợp nhiều dạng câu hỏi (trắc nghiệm, điền khuyết, bài tập nếu có)."
     }
     instruction = quiz_type_instructions.get(quiz_type, quiz_type_instructions["mcq"])
 
@@ -129,6 +128,7 @@ def _generate_quiz_from_text(text: str, num_questions: int, quiz_type: str):
         1. Tạo chính xác {num_questions} câu hỏi loại: {instruction}
         2. Với mỗi câu hỏi, hãy viết một lời "giai_thich" ngắn gọn (tại sao đáp án đó đúng).
         3. Với mỗi câu hỏi, hãy tìm "trich_dan" là CÂU NGUYÊN VĂN trong văn bản chứa thông tin trả lời.
+       Chú ý: Các câu hỏi không dùng các từ theo văn bản, theo đoạn văn, theo đoạn trích.
 
         QUY TẮC ĐỊNH DẠNG JSON:
         - Trả về CHUỖI JSON hợp lệ, KHÔNG thêm văn bản giải thích nào bên ngoài.
@@ -162,7 +162,7 @@ def _generate_quiz_from_text(text: str, num_questions: int, quiz_type: str):
 
 class QuizRequest(BaseModel):
     text: str
-    num_questions: int = Field(5, gt=0, le=20)
+    num_questions: int = Field(5, gt=0, le=25)
     quiz_type: str = "mcq"
 
 @app.post("/generate-quiz") 
@@ -244,7 +244,8 @@ def save_quiz(
         new_quiz = models.Quiz(
             title=quiz_to_save.title,
             owner_id=current_user.id,
-            folder_id=quiz_to_save.folder_id
+            folder_id=quiz_to_save.folder_id,
+            quiz_type=quiz_to_save.quiz_type
         )
         db.add(new_quiz)
         db.commit()
@@ -274,7 +275,6 @@ def save_quiz(
         print(f"Lỗi khi lưu quiz: {e}")
         raise HTTPException(status_code=500, detail=f"Lỗi máy chủ nội bộ: {e}")
 
-# ✅ SỬA API /MY-QUIZZES
 @app.get("/my-quizzes", response_model=List[schemas.QuizOut])
 def get_user_quizzes(
     db: Session = Depends(get_db),
@@ -326,12 +326,10 @@ def update_quiz_title(
     db.refresh(quiz)
     return quiz
 
-# ✅ CẬP NHẬT: Đổi URL thành số nhiều (/quizzes/) để khớp với Frontend mới
 @app.get("/quizzes/{quiz_id}", response_model=schemas.QuizOut)
 def get_quiz_details(
     quiz_id: int, 
     db: Session = Depends(get_db),
-    # Có thể thêm current_user nếu muốn bảo mật (chỉ chủ sở hữu mới xem được)
     current_user: models.User = Depends(get_current_user) 
 ):
     """
@@ -344,62 +342,81 @@ def get_quiz_details(
     if not quiz:
         raise HTTPException(status_code=404, detail="Không tìm thấy bộ quiz")
     
-    # (Tùy chọn) Kiểm tra quyền sở hữu
     if quiz.owner_id != current_user.id:
          raise HTTPException(status_code=403, detail="Bạn không có quyền truy cập Quiz này")
 
     return quiz
 
 
-# === API NHẬN KẾT QUẢ VÀ "ĐÁNH GIÁ" (ĐÃ SỬA LỖI) ===
-class QuizResult(BaseModel):
+# === ✅ API NHẬN KẾT QUẢ VÀ LƯU LỊCH SỬ (ĐÃ CẬP NHẬT) ===
+# Định nghĩa Model cho item trong list gửi lên (để tránh trùng tên với models.QuizResult)
+class QuizSubmissionItem(BaseModel):
     question_id: int
     is_correct: bool
 
 @app.post("/submit-quiz/{quiz_id}")
 def submit_quiz_results(
     quiz_id: int, 
-    results: List[QuizResult], # Nhận một danh sách kết quả
+    results: List[QuizSubmissionItem], 
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user) # Bắt buộc đăng nhập
+    current_user: models.User = Depends(get_current_user)
 ):
     """
-    Nhận kết quả làm bài của user và cập nhật "bộ nhớ" (bảng stats)
+    1. Cập nhật UserQuestionStats (để biết câu nào hay sai).
+    2. Lưu QuizResult (Lịch sử làm bài, điểm số).
     """
+    correct_count = 0
+    total_questions = len(results)
+
     try:
+        # 1. Cập nhật thống kê từng câu (Logic cũ)
         for result in results:
+            if result.is_correct: 
+                correct_count += 1
+            
             stat = db.query(models.UserQuestionStats).filter(
                 models.UserQuestionStats.user_id == current_user.id,
                 models.UserQuestionStats.question_id == result.question_id
             ).first()
             
-            # === SỬA LỖI Ở ĐÂY ===
             if not stat:
-                # Nếu chưa có, tạo mới VÀ gán giá trị ban đầu là 0
                 stat = models.UserQuestionStats(
                     user_id=current_user.id,
                     question_id=result.question_id,
-                    correct_attempts=0,    # <-- THÊM DÒNG NÀY
-                    incorrect_attempts=0   # <-- THÊM DÒNG NÀY
+                    correct_attempts=0,
+                    incorrect_attempts=0
                 )
                 db.add(stat)
-            # === KẾT THÚC SỬA LỖI ===
             
-            # 3. Cập nhật "bộ nhớ"
             if result.is_correct:
                 stat.correct_attempts += 1
             else:
                 stat.incorrect_attempts += 1
-                
-        # 4. Lưu tất cả thay đổi
+            
+            stat.last_attempted_at = datetime.utcnow()
+
+        # 2. ✅ LƯU LỊCH SỬ LÀM BÀI (LOGIC MỚI)
+        # Tính điểm thang 10
+        score_10 = round((correct_count / total_questions) * 10) if total_questions > 0 else 0
+        
+        history_entry = models.QuizResult(
+            user_id=current_user.id,
+            quiz_id=quiz_id,
+            score=score_10,
+            total_questions=total_questions,
+            completed_at=datetime.utcnow()
+        )
+        db.add(history_entry)
+        
         db.commit()
     except Exception as e:
-        db.rollback() # Hoàn tác nếu có lỗi
+        db.rollback() 
         print(f"Lỗi khi submit quiz: {e}")
         raise HTTPException(status_code=500, detail="Lỗi máy chủ khi lưu kết quả.")
 
-    return {"message": "Đã ghi nhận kết quả ôn tập."}
+    return {"message": "Đã ghi nhận kết quả và lưu lịch sử."}
 
+# --- API STATS CHO CÂU HỎI HAY SAI (Dùng cho chế độ luyện tập) ---
 class QuestionStatOut(BaseModel):
     question_id: int
     is_frequently_wrong: bool
@@ -427,49 +444,98 @@ def get_question_stats_for_quiz(
         )
     return result_list
 
+# === ✅ API DASHBOARD STATS (CẬP NHẬT MỚI) ===
 @app.get("/dashboard-stats")
 def get_dashboard_stats(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    # 1. Đếm tổng số Quiz
+    # 1. Tổng số Quiz
     total_quizzes = db.query(models.Quiz).filter(models.Quiz.owner_id == current_user.id).count()
     
-    # 2. Tính tổng số câu đúng / sai
-    stats = db.query(
-        func.sum(models.UserQuestionStats.correct_attempts),
-        func.sum(models.UserQuestionStats.incorrect_attempts)
-    ).filter(models.UserQuestionStats.user_id == current_user.id).first()
+    # 2. ✅ Tổng số lần làm bài (Thay cho tổng câu hỏi đã ôn)
+    total_completed = db.query(models.QuizResult).filter(models.QuizResult.user_id == current_user.id).count()
     
-    total_correct = stats[0] if stats[0] else 0
-    total_incorrect = stats[1] if stats[1] else 0
-    total_questions_answered = total_correct + total_incorrect
-    
+    # 3. ✅ Tổng số Folder
+    total_folders = db.query(models.Folder).filter(models.Folder.user_id == current_user.id).count()
+
+    # 4. ✅ Tổng số Quiz yêu thích
+    total_favorites = db.query(models.Quiz).filter(
+        models.Quiz.owner_id == current_user.id, 
+        models.Quiz.is_favorite == True
+    ).count()
+
     return {
         "total_quizzes": total_quizzes,
-        "total_questions_answered": total_questions_answered,
-        "total_correct": total_correct,
-        "total_incorrect": total_incorrect
+        "total_completed": total_completed,
+        "total_folders": total_folders,
+        "total_favorites": total_favorites
     }
 
-# === API LẤY 5 QUIZ GẦN NHẤT CHO DASHBOARD ===
+# === API 5 QUIZ TẠO GẦN NHẤT (Dùng cho bảng 'Lịch sử tạo đề') ===
 @app.get("/recent-quizzes", response_model=List[schemas.QuizOut])
 def get_recent_quizzes(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    """Lấy 5 bộ quiz được tạo gần đây nhất"""
     recent_quizzes = db.query(models.Quiz)\
         .filter(models.Quiz.owner_id == current_user.id)\
         .order_by(models.Quiz.created_at.desc())\
         .limit(5)\
         .all()
-    
     return recent_quizzes
 
+# === ✅ API 5 LỊCH SỬ LÀM BÀI GẦN NHẤT (MỚI) ===
+@app.get("/quiz-history")
+def get_quiz_history(
+    limit: int = 5,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    results = db.query(models.QuizResult)\
+        .filter(models.QuizResult.user_id == current_user.id)\
+        .order_by(desc(models.QuizResult.completed_at))\
+        .limit(limit).all()
+    
+    history_list = []
+    for r in results:
+        history_list.append({
+            "quiz_id": r.quiz_id,
+            "quiz_title": r.quiz.title if r.quiz else "Quiz đã xóa",
+            "score": r.score,
+            "total_questions": r.total_questions,
+            "completed_at": r.completed_at
+        })
+    return history_list
 
-# === API QUẢN LÝ FOLDER (MỚI) ===
+# ===  API DANH SÁCH YÊU THÍCH (MỚI) ===
+@app.get("/favorite-quizzes", response_model=List[schemas.QuizOut])
+def get_favorite_quizzes(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    return db.query(models.Quiz).options(
+        joinedload(models.Quiz.questions) 
+    ).filter(
+        models.Quiz.owner_id == current_user.id,
+        models.Quiz.is_favorite == True
+    ).all()
 
+@app.patch("/quizzes/{quiz_id}/favorite")
+def toggle_favorite(
+    quiz_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id, models.Quiz.owner_id == current_user.id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz không tồn tại")
+    
+    quiz.is_favorite = not quiz.is_favorite 
+    db.commit()
+    return {"id": quiz.id, "is_favorite": quiz.is_favorite}
+
+# === API QUẢN LÝ FOLDER ===
 @app.post("/folders", response_model=schemas.FolderOut)
 def create_folder(
     folder: schemas.FolderCreate,
@@ -495,13 +561,10 @@ def delete_folder(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    # Tìm folder
     folder = db.query(models.Folder).filter(models.Folder.id == folder_id).first()
     if not folder or folder.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Không tìm thấy thư mục")
     
-    # Logic xóa: Khi xóa folder, các quiz bên trong sẽ được đẩy ra ngoài (folder_id = NULL)
-    # Thay vì xóa luôn quiz (nguy hiểm).
     quizzes_in_folder = db.query(models.Quiz).filter(models.Quiz.folder_id == folder_id).all()
     for q in quizzes_in_folder:
         q.folder_id = None
@@ -510,7 +573,6 @@ def delete_folder(
     db.commit()
     return {"message": "Đã xóa thư mục (các quiz đã được chuyển ra ngoài)"}
 
-# === API DI CHUYỂN QUIZ VÀO FOLDER (MỚI) ===
 @app.put("/quizzes/{quiz_id}/move")
 def move_quiz(
     quiz_id: int,
@@ -522,7 +584,6 @@ def move_quiz(
     if not quiz or quiz.owner_id != current_user.id:
         raise HTTPException(status_code=404, detail="Không tìm thấy quiz")
     
-    # Cập nhật folder_id (có thể là một số ID hoặc None)
     quiz.folder_id = move_data.folder_id
     db.commit()
     return {"message": "Đã di chuyển quiz thành công"}
@@ -532,41 +593,33 @@ def move_quiz(
 @app.get("/quizzes/{quiz_id}/export/docx")
 def export_quiz_docx(
     quiz_id: int,
-    db: Session = Depends(get_db),
-    # current_user: models.User = Depends(get_current_user) # Có thể bỏ comment nếu muốn bảo mật
+    db: Session = Depends(get_db)
 ):
-    # 1. Lấy dữ liệu quiz
     quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
     if not quiz:
         raise HTTPException(status_code=404, detail="Không tìm thấy quiz")
 
-    # 2. Tạo file Word trong bộ nhớ
     doc = docx.Document()
     
-    # -- Tiêu đề --
     heading = doc.add_heading(quiz.title, 0)
     heading.alignment = WD_ALIGN_PARAGRAPH.CENTER
     
     doc.add_paragraph(f"Số lượng câu hỏi: {len(quiz.questions)}")
     doc.add_paragraph("-" * 50)
 
-    # -- Danh sách câu hỏi --
     for i, q in enumerate(quiz.questions):
-        # Câu hỏi (In đậm)
         p = doc.add_paragraph()
         run = p.add_run(f"Câu {i+1}: {q.question_text}")
         run.bold = True
         run.font.size = Pt(12)
         
-        # Các lựa chọn
         doc.add_paragraph(f"A. {q.choice_a}")
         doc.add_paragraph(f"B. {q.choice_b}")
         doc.add_paragraph(f"C. {q.choice_c}")
         doc.add_paragraph(f"D. {q.choice_d}")
         
-        doc.add_paragraph() # Dòng trống ngăn cách
+        doc.add_paragraph() 
 
-    # -- Phần Đáp án (Sang trang mới) --
     doc.add_page_break()
     doc.add_heading("ĐÁP ÁN & GIẢI THÍCH", 1)
     
@@ -580,15 +633,11 @@ def export_quiz_docx(
         
         doc.add_paragraph("-" * 20)
 
-    # 3. Lưu file vào bộ nhớ đệm (BytesIO) thay vì ổ cứng
     byte_io = io.BytesIO()
     doc.save(byte_io)
-    byte_io.seek(0) # Đưa con trỏ về đầu file
+    byte_io.seek(0) 
 
-    # 4. Trả về file cho trình duyệt tải xuống
     filename = f"Quiz_{quiz.id}.docx"
-    
-    # Cần quote tên file để tránh lỗi nếu có dấu tiếng Việt/khoảng trắng
     from urllib.parse import quote
     encoded_filename = quote(filename)
 
@@ -598,44 +647,40 @@ def export_quiz_docx(
         headers={"Content-Disposition": f"attachment; filename*=utf-8''{encoded_filename}"}
     )
 
-# === API BIỂU ĐỒ HOẠT ĐỘNG (DỮ LIỆU THẬT 7 NGÀY) ===
-# ... (Các import giữ nguyên) ...
-
+# === ✅ API BIỂU ĐỒ HOẠT ĐỘNG (CẬP NHẬT: Dùng bảng QuizResult) ===
 @app.get("/activity-chart")
 def get_activity_chart_data(
-    time_range: str = "week", # ✅ Thêm tham số này (mặc định là week)
+    time_range: str = "week",
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
     today = date.today()
     dates = []
     quizzes_created_data = []
-    questions_answered_data = []
+    quizzes_taken_data = [] # ✅ Thay thế key cũ "answered"
 
-    # Xác định số ngày cần lấy
     days_to_fetch = 30 if time_range == "month" else 7
 
-    # Lặp từ quá khứ đến hiện tại
     for i in range(days_to_fetch - 1, -1, -1):
         target_date = today - timedelta(days=i)
         dates.append(target_date.strftime("%d/%m"))
 
-        # Đếm số Quiz
+        # Đếm số Quiz tạo
         quiz_count = db.query(models.Quiz).filter(
             models.Quiz.owner_id == current_user.id,
             func.date(models.Quiz.created_at) == target_date
         ).count()
         quizzes_created_data.append(quiz_count)
 
-        # Đếm số Câu hỏi
-        question_count = db.query(models.UserQuestionStats).filter(
-            models.UserQuestionStats.user_id == current_user.id,
-            func.date(models.UserQuestionStats.last_attempted_at) == target_date
+        # ✅ Đếm số Bài đã làm (QuizResult)
+        taken_count = db.query(models.QuizResult).filter(
+            models.QuizResult.user_id == current_user.id,
+            func.date(models.QuizResult.completed_at) == target_date
         ).count()
-        questions_answered_data.append(question_count)
+        quizzes_taken_data.append(taken_count)
 
     return {
         "labels": dates,
         "created": quizzes_created_data,
-        "answered": questions_answered_data
+        "taken": quizzes_taken_data # ✅ Trả về key mới
     }
