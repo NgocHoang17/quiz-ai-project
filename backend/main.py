@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, F
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session, joinedload 
-from sqlalchemy import func, desc # ✅ Thêm desc để sắp xếp giảm dần
+from sqlalchemy import func, desc 
 from typing import List, Optional
 from datetime import timedelta
 import io
@@ -14,7 +14,6 @@ from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH 
 from datetime import datetime, timedelta, date 
 
-# Import các file .py của bạn
 from . import models, schemas, security
 from .database import engine, SessionLocal
 import google.generativeai as genai
@@ -29,7 +28,7 @@ load_dotenv(dotenv_path=dotenv_path)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
-    print("❌ LỖI: Không tìm thấy GEMINI_API_KEY")
+    print(" LỖI: Không tìm thấy GEMINI_API_KEY")
 else:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
@@ -155,7 +154,7 @@ def _generate_quiz_from_text(text: str, num_questions: int, quiz_type: str):
             return None, "AI trả về định dạng JSON không hợp lệ."
 
     except Exception as e:
-        print(f"❌ Lỗi khi gọi Gemini API: {e}")
+        print(f" Lỗi khi gọi Gemini API: {e}")
         return None, f"Lỗi khi gọi Gemini API: {str(e)}"
 
 # --- API QUIZ (TẠO VÀ LƯU) ---
@@ -348,7 +347,7 @@ def get_quiz_details(
     return quiz
 
 
-# === ✅ API NHẬN KẾT QUẢ VÀ LƯU LỊCH SỬ (ĐÃ CẬP NHẬT) ===
+# ===  API NHẬN KẾT QUẢ VÀ LƯU LỊCH SỬ ===
 # Định nghĩa Model cho item trong list gửi lên (để tránh trùng tên với models.QuizResult)
 class QuizSubmissionItem(BaseModel):
     question_id: int
@@ -395,7 +394,7 @@ def submit_quiz_results(
             
             stat.last_attempted_at = datetime.utcnow()
 
-        # 2. ✅ LƯU LỊCH SỬ LÀM BÀI (LOGIC MỚI)
+        # 2.  LƯU LỊCH SỬ LÀM BÀI 
         # Tính điểm thang 10
         score_10 = round((correct_count / total_questions) * 10) if total_questions > 0 else 0
         
@@ -444,7 +443,7 @@ def get_question_stats_for_quiz(
         )
     return result_list
 
-# === ✅ API DASHBOARD STATS (CẬP NHẬT MỚI) ===
+# ===  API DASHBOARD STATS  ===
 @app.get("/dashboard-stats")
 def get_dashboard_stats(
     db: Session = Depends(get_db),
@@ -453,13 +452,13 @@ def get_dashboard_stats(
     # 1. Tổng số Quiz
     total_quizzes = db.query(models.Quiz).filter(models.Quiz.owner_id == current_user.id).count()
     
-    # 2. ✅ Tổng số lần làm bài (Thay cho tổng câu hỏi đã ôn)
+    # 2.  Tổng số lần làm bài (Thay cho tổng câu hỏi đã ôn)
     total_completed = db.query(models.QuizResult).filter(models.QuizResult.user_id == current_user.id).count()
     
-    # 3. ✅ Tổng số Folder
+    # 3.  Tổng số Folder
     total_folders = db.query(models.Folder).filter(models.Folder.user_id == current_user.id).count()
 
-    # 4. ✅ Tổng số Quiz yêu thích
+    # 4.  Tổng số Quiz yêu thích
     total_favorites = db.query(models.Quiz).filter(
         models.Quiz.owner_id == current_user.id, 
         models.Quiz.is_favorite == True
@@ -485,7 +484,7 @@ def get_recent_quizzes(
         .all()
     return recent_quizzes
 
-# === ✅ API 5 LỊCH SỬ LÀM BÀI GẦN NHẤT (MỚI) ===
+# ===  API 5 LỊCH SỬ LÀM BÀI GẦN NHẤT (MỚI) ===
 @app.get("/quiz-history")
 def get_quiz_history(
     limit: int = 5,
@@ -647,7 +646,7 @@ def export_quiz_docx(
         headers={"Content-Disposition": f"attachment; filename*=utf-8''{encoded_filename}"}
     )
 
-# === ✅ API BIỂU ĐỒ HOẠT ĐỘNG (CẬP NHẬT: Dùng bảng QuizResult) ===
+# ===  API BIỂU ĐỒ HOẠT ĐỘNG  ===
 @app.get("/activity-chart")
 def get_activity_chart_data(
     time_range: str = "week",
@@ -657,7 +656,7 @@ def get_activity_chart_data(
     today = date.today()
     dates = []
     quizzes_created_data = []
-    quizzes_taken_data = [] # ✅ Thay thế key cũ "answered"
+    quizzes_taken_data = [] 
 
     days_to_fetch = 30 if time_range == "month" else 7
 
@@ -672,7 +671,7 @@ def get_activity_chart_data(
         ).count()
         quizzes_created_data.append(quiz_count)
 
-        # ✅ Đếm số Bài đã làm (QuizResult)
+        #  Đếm số Bài đã làm (QuizResult)
         taken_count = db.query(models.QuizResult).filter(
             models.QuizResult.user_id == current_user.id,
             func.date(models.QuizResult.completed_at) == target_date
@@ -682,5 +681,5 @@ def get_activity_chart_data(
     return {
         "labels": dates,
         "created": quizzes_created_data,
-        "taken": quizzes_taken_data # ✅ Trả về key mới
+        "taken": quizzes_taken_data #  Trả về key mới
     }

@@ -1,4 +1,3 @@
-// === BIẾN TOÀN CỤC ===
 let allQuizzes = [];
 let allFolders = [];
 let currentViewFolderId = null; // null = Thư mục gốc
@@ -309,4 +308,4 @@ async function toggleFavorite(event, quizId) {
 }
 
 function escapeHTML(str) { if (typeof str !== 'string') return ''; return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#039;'}[m])); }
-function formatTimeAgo(dateString) { return "Vừa xong"; } // Giữ gọn, bạn có thể dùng hàm format cũ
+function formatTimeAgo(dateString) { return ""; } 

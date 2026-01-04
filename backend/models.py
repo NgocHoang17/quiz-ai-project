@@ -7,7 +7,7 @@ from datetime import datetime
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
-    # ✅ MySQL cần độ dài cụ thể cho String, đặc biệt là unique/index
+    # MySQL cần độ dài cụ thể cho String, đặc biệt là unique/index
     email = Column(String(255), unique=True, index=True) 
     hashed_password = Column(String(255))
     
@@ -20,7 +20,7 @@ class User(Base):
 class Folder(Base):
     __tablename__ = "folders"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255)) # ✅ Thêm độ dài
+    name = Column(String(255)) #  Thêm độ dài
     created_at = Column(DateTime, default=datetime.utcnow)
     user_id = Column(Integer, ForeignKey("users.id"))
     
@@ -31,9 +31,9 @@ class Folder(Base):
 class Quiz(Base):
     __tablename__ = "quizzes"
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(255)) # ✅ Thêm độ dài
+    title = Column(String(255)) #  Thêm độ dài
     created_at = Column(DateTime, default=datetime.utcnow)
-    quiz_type = Column(String(50), default="mcq") # ✅ Thêm độ dài
+    quiz_type = Column(String(50), default="mcq") #  Thêm độ dài
     
     is_favorite = Column(Boolean, default=False) 
 
@@ -51,7 +51,7 @@ class Question(Base):
     id = Column(Integer, primary_key=True, index=True)
     question_text = Column(Text) # Text trong MySQL không cần độ dài
     
-    # ✅ Các lựa chọn nên có độ dài giới hạn hoặc dùng Text nếu quá dài
+    #  Các lựa chọn nên có độ dài giới hạn hoặc dùng Text nếu quá dài
     choice_a = Column(String(255)) 
     choice_b = Column(String(255))
     choice_c = Column(String(255))

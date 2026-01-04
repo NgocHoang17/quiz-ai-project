@@ -36,7 +36,7 @@ class QuestionOut(QuestionBase):
     class Config:
         from_attributes = True
 
-# --- Schemas cho Quiz (CẬP NHẬT) ---
+# --- Schemas cho Quiz  ---
 class QuizBase(BaseModel):
     title: str
     folder_id: Optional[int] = None

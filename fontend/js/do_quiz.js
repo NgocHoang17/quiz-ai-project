@@ -57,7 +57,7 @@ async function loadQuestions(quizId, token) {
         document.getElementById('quiz-title').innerText = data.title;
         questionsData = data.questions;
 
-        // ✅ XỬ LÝ TRỘN CÂU HỎI
+        // XỬ LÝ TRỘN CÂU HỎI
         const urlParams = new URLSearchParams(window.location.search);
         const shouldShuffleQ = urlParams.get('shuffle_q') === '1';
         
@@ -99,7 +99,7 @@ function renderQuestions(questions) {
             ? `<span class="badge bg-danger ms-2 animate__animated animate__fadeIn"><i class="fa-solid fa-flag me-1"></i>Hay sai</span>` 
             : '';
 
-        // ✅ XỬ LÝ TRỘN ĐÁP ÁN
+        // XỬ LÝ TRỘN ĐÁP ÁN
         let optionKeys = ['A', 'B', 'C', 'D'];
         if (shouldShuffleA) {
             optionKeys = shuffleArray(optionKeys); 

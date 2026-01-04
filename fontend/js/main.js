@@ -1,4 +1,3 @@
-// Biến toàn cục
 let currentQuizData = null;
 let saveQuizModal = null;
 
@@ -93,7 +92,7 @@ generateButton.addEventListener('click', function() {
     const quizType = quizTypeSelect.value;
     
     if (isNaN(numQuestions) || numQuestions < 1 || numQuestions > 25) {
-        alert("Vui lòng nhập số lượng câu hỏi hợp lệ (1-20).");
+        alert("Vui lòng nhập số lượng câu hỏi hợp lệ (1-25).");
         return;
     }
 
@@ -276,21 +275,21 @@ document.getElementById('confirm-save-quiz-btn').addEventListener('click', async
             else if (currentQuizType === 'exercise') typeLabel = "Bài tập";
             else if (currentQuizType === 'mixed') typeLabel = "Hỗn hợp";
 
-            saveQuizMessage.innerText = `✅ Đã lưu thành công: "${savedQuiz.title}" (${typeLabel})`;
+            saveQuizMessage.innerText = ` Đã lưu thành công: "${savedQuiz.title}" (${typeLabel})`;
             saveQuizMessage.className = 'text-success';
             saveQuizButton.style.display = 'none'; 
         } else if (response.status === 401) {
-            saveQuizMessage.innerText = '❌ Lỗi: Hết phiên đăng nhập.';
+            saveQuizMessage.innerText = ' Lỗi: Hết phiên đăng nhập.';
             localStorage.removeItem('quizAIToken');
             window.location.href = 'login.html';
         } else {
             const errorData = await response.json();
-            saveQuizMessage.innerText = `❌ Lỗi khi lưu: ${errorData.detail || 'Lỗi không xác định'}`;
+            saveQuizMessage.innerText = ` Lỗi khi lưu: ${errorData.detail || 'Lỗi không xác định'}`;
             saveQuizMessage.className = 'text-danger';
         }
     } catch (err) {
         console.error("Lỗi lưu:", err);
-        saveQuizMessage.innerText = '❌ Lỗi kết nối.';
+        saveQuizMessage.innerText = ' Lỗi kết nối.';
         saveQuizMessage.className = 'text-danger';
     }
 });
