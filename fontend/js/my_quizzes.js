@@ -137,7 +137,7 @@ function renderCurrentView() {
     emptyMsg.style.display = (!hasFolders && quizzesInView.length === 0) ? 'block' : 'none';
 }
 
-// ✅ CẬP NHẬT: HÀM TẠO HTML QUIZ (CÓ NÚT TRÁI TIM)
+// HÀM TẠO HTML QUIZ (CÓ NÚT TRÁI TIM)
 function createQuizElement(quiz) {
     const quizItem = document.createElement('div');
     quizItem.id = `quiz-item-${quiz.id}`;
@@ -154,9 +154,11 @@ function createQuizElement(quiz) {
             </button>
 
             <div onclick="viewQuiz(${quiz.id})" style="cursor: pointer;" class="flex-grow-1">
-                <h5 class="mb-1 text-primary fw-bold text-decoration-none">
-                    <i class="fa-regular fa-file-lines me-2"></i>${escapeHTML(quiz.title)}
+                <h5 class="mb-1 fw-bold">
+                    <i class="fa-regular fa-file-lines me-2 text-muted"></i>
+                    <span class="quiz-title">${escapeHTML(quiz.title)}</span>
                 </h5>
+
                 <small class="text-muted">
                     <i class="fa-solid fa-layer-group me-1"></i> ${quiz.questions.length} câu &bull; 
                     <i class="fa-regular fa-clock me-1"></i> ${timeAgo}

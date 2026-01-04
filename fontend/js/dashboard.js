@@ -1,7 +1,7 @@
 let startQuizModal, viewModal;
 let quizIdToStart = null;
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const token = localStorage.getItem('quizAIToken');
     if (!token) { window.location.href = 'login.html'; return; }
 
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadFavorites(token);
 
     // Event Listeners
-    document.getElementById('chart-period').addEventListener('change', function() {
+    document.getElementById('chart-period').addEventListener('change', function () {
         drawActivityChart(token, this.value);
     });
 
@@ -35,14 +35,14 @@ document.addEventListener('DOMContentLoaded', function() {
 function getQuizTypeBadge(type) {
     // Chuẩn hóa input phòng trường hợp null/undefined
     const safeType = type ? type.toLowerCase() : 'mcq';
-    
+
     let label = '';
     let badgeClass = '';
 
     switch (safeType) {
         case 'mcq':
             label = 'Trắc nghiệm';
-            badgeClass = 'bg-info text-dark bg-opacity-25 border border-info'; 
+            badgeClass = 'bg-info text-dark bg-opacity-25 border border-info';
             break;
         case 'fill_in_blank':
             label = 'Điền khuyết';
@@ -83,8 +83,8 @@ async function loadDashboardStats(token) {
 
 async function drawActivityChart(token, period) {
     const ctx = document.getElementById('activityChart').getContext('2d');
-    const gPurple = ctx.createLinearGradient(0,0,0,320); gPurple.addColorStop(0, '#6a11cb'); gPurple.addColorStop(1, 'rgba(106,17,203,0.05)');
-    const gGreen = ctx.createLinearGradient(0,0,0,320); gGreen.addColorStop(0, '#00b894'); gGreen.addColorStop(1, 'rgba(0,184,148,0.05)');
+    const gPurple = ctx.createLinearGradient(0, 0, 0, 320); gPurple.addColorStop(0, '#6a11cb'); gPurple.addColorStop(1, 'rgba(106,17,203,0.05)');
+    const gGreen = ctx.createLinearGradient(0, 0, 0, 320); gGreen.addColorStop(0, '#00b894'); gGreen.addColorStop(1, 'rgba(0,184,148,0.05)');
 
     try {
         const res = await fetch(`http://127.0.0.1:8000/activity-chart?time_range=${period}`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -104,7 +104,7 @@ async function drawActivityChart(token, period) {
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { position: 'top' } },
-                scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { borderDash: [5,5] } } }
+                scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { borderDash: [5, 5] } } }
             }
         });
     } catch (err) { console.error(err); }
@@ -119,10 +119,10 @@ async function loadHistory(token) {
         tbody.innerHTML = '';
         data.forEach(item => {
             const dateStr = new Date(item.completed_at).toLocaleDateString('vi-VN');
-            const safeTitle = escapeHTML(item.quiz_title); 
+            const safeTitle = escapeHTML(item.quiz_title);
             tbody.innerHTML += `
                 <tr>
-                    <td class="ps-4 fw-bold text-primary">${safeTitle}</td>
+                    <td class="ps-4 fw-bold"><span class="quiz-title">${safeTitle}</span></td>
                     <td>${item.total_questions} câu</td>
                     <td><span class="badge bg-secondary">${item.score}/10</span></td>
                     <td>${dateStr}</td>
@@ -133,7 +133,7 @@ async function loadHistory(token) {
                     </td>
                 </tr>`;
         });
-        if(data.length === 0) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">Chưa có lịch sử làm bài</td></tr>';
+        if (data.length === 0) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">Chưa có lịch sử làm bài</td></tr>';
     } catch (err) { console.error(err); }
 }
 
@@ -146,19 +146,19 @@ async function loadRecentCreated(token) {
         tbody.innerHTML = '';
         data.forEach(q => {
             const dateStr = new Date(q.created_at).toLocaleDateString('vi-VN');
-            
+
             // SỬ DỤNG HÀM ĐỒNG BỘ LOẠI ĐỀ TẠI ĐÂY
             const typeBadge = getQuizTypeBadge(q.quiz_type);
 
             tbody.innerHTML += `
                 <tr>
-                    <td class="ps-4 fw-bold">${escapeHTML(q.title)}</td>
+                    <td class="ps-4 fw-bold"><span class="quiz-title">${escapeHTML(q.title)}</span></td>
                     <td>${q.questions.length}</td>
                     <td>${typeBadge}</td> 
                     <td>${dateStr}</td>
                 </tr>`;
         });
-        if(data.length === 0) tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">Chưa tạo đề nào</td></tr>';
+        if (data.length === 0) tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">Chưa tạo đề nào</td></tr>';
     } catch (err) { console.error(err); }
 }
 
@@ -167,12 +167,12 @@ async function loadFavorites(token) {
     const tbody = document.getElementById('favorites-list');
     try {
         const res = await fetch('http://127.0.0.1:8000/favorite-quizzes', { headers: { 'Authorization': `Bearer ${token}` } });
-        
+
         if (!res.ok) throw new Error("Lỗi Server");
-        
+
         const data = await res.json();
         tbody.innerHTML = '';
-        
+
         if (data.length === 0) {
             tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">Chưa có đề yêu thích</td></tr>';
             return;
@@ -182,13 +182,16 @@ async function loadFavorites(token) {
             const safeTitle = escapeHTML(q.title);
             const jsSafeTitle = safeTitle.replace(/'/g, "\\'");
             const questionCount = q.questions ? q.questions.length : 0;
-            
+
             // SỬ DỤNG HÀM ĐỒNG BỘ LOẠI ĐỀ TẠI ĐÂY
             const typeBadge = getQuizTypeBadge(q.quiz_type);
 
             tbody.innerHTML += `
                 <tr>
-                    <td class="ps-4 fw-bold text-danger"><i class="fa-solid fa-heart me-2"></i>${safeTitle}</td>
+                    <td class="ps-4 fw-bold">
+                      <i class="fa-solid fa-heart me-2 text-danger"></i>
+                      <span class="quiz-title">${safeTitle}</span>
+                    </td>
                     <td>${questionCount}</td>
                     <td>${typeBadge}</td>
                     <td class="text-end pe-4">
@@ -197,7 +200,7 @@ async function loadFavorites(token) {
                     </td>
                 </tr>`;
         });
-    } catch (err) { 
+    } catch (err) {
         console.error("Lỗi tải yêu thích:", err);
         tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-danger">Không tải được dữ liệu</td></tr>`;
     }
@@ -215,7 +218,7 @@ function openStartModal(id, title) {
 
 function setupStartModalLogic() {
     document.querySelectorAll('input[name="quizMode"]').forEach(r => {
-        r.addEventListener('change', function() {
+        r.addEventListener('change', function () {
             document.getElementById('timer-input-section').classList.toggle('d-none', this.value !== 'timer');
         });
     });
@@ -238,7 +241,7 @@ async function previewQuiz(id) {
         data.questions.forEach((q, i) => {
             body.innerHTML += `
                 <div class="mb-3 border-bottom pb-3">
-                    <h6 class="fw-bold">Câu ${i+1}: ${escapeHTML(q.question_text)}</h6>
+                    <h6 class="fw-bold">Câu ${i + 1}: ${escapeHTML(q.question_text)}</h6>
                     <ul class="list-unstyled ps-3 mb-0 text-muted">
                         <li>A. ${escapeHTML(q.choice_a)}</li>
                         <li>B. ${escapeHTML(q.choice_b)}</li>
@@ -253,5 +256,5 @@ async function previewQuiz(id) {
 
 function escapeHTML(str) {
     if (typeof str !== 'string') return '';
-    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#039;'}[m]));
+    return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#039;' }[m]));
 }

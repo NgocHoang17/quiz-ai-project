@@ -228,11 +228,87 @@ textarea {
     transform: scale(1.02);
 }
 
-/* =========================================
-   7. UTILS
-   ========================================= */
+/*  UTILS*/
 .chart-container-wrapper {
     height: 320px;
     position: relative;
     width: 100%;
 }
+
+/* Đồng bộ màu tên Quiz ở dashboard */
+.quiz-title{
+  color: #0a0a0b;        
+  font-weight: 700;
+  font-size: 1rem;      /* đồng bộ độ đậm */
+}
+
+/* LIBRARY PAGE THEME */
+
+/* Title "Thư viện của tôi" */
+.library-title{
+  color: #1a4a80;
+}
+
+/* Nút "Tạo thư mục" */
+.library-page .btn-outline-primary{
+  color: #1a4180;
+  border-color: #1a2980;
+}
+.library-page .btn-outline-primary:hover{
+  background-color: #1a4180;
+  border-color: #1a2980;
+  color: #fff;
+}
+
+/* Nút "Làm bài" */
+.library-page .btn-primary{
+  background-color: #204d9a;
+  border-color: #1a2980;
+}
+.library-page .btn-primary:hover{
+  background-color: #599dc8;
+  border-color: #4073ad;
+}
+
+/* THEME OVERRIDE – TRANG TẠO QUIZ (index.html) */
+
+/* 1. Text màu primary */
+.text-primary{
+    color: #2358a1 !important;
+}
+
+/* 2. Background primary */
+.bg-primary{
+    background-color: #2358a1 ;
+}
+
+/* 3. Border primary */
+.border-primary{
+    border-color: #2358a1 ;
+}
+
+/* 4. Nút chính (Tạo Quiz Ngay, các btn-primary) */
+.btn-primary{
+    background-color: #2358a1 ;
+    border-color: #2358a1 ;
+    color: #fff ;
+}
+
+.btn-primary:hover{
+    background-color: #2686d0 ;
+    border-color: #2686d0 ;
+}
+
+/* 5. Tabs đang active */
+.nav-tabs .nav-link.active{
+    color: #2358a1 ;
+    border-bottom: 3px solid #2358a1 ;
+}
+
+/* 6. Spinner & icon dùng text-primary */
+.spinner-border.text-primary{
+    color: #2358a1 ;
+}
+
+
+

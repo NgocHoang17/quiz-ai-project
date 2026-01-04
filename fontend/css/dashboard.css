@@ -46,3 +46,14 @@
 /* Tùy chỉnh bảng */
 .table > :not(caption) > * > * { padding: 1rem 1.5rem; }
 .table-hover tbody tr:hover { background-color: #f8f9fa; }
+
+/**/
+ .btn-outline-primary{
+  color: #1a4180;
+  border-color: #1a2980;
+}
+ .btn-outline-primary:hover{
+  background-color: #1a4180;
+  border-color: #1a2980;
+  color: #fff;
+}
