@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from .database import Base
 from datetime import datetime
 
-# --- BẢNG USER ---
+#  BẢNG USER 
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
@@ -16,7 +16,7 @@ class User(Base):
     question_stats = relationship("UserQuestionStats", back_populates="user")
     quiz_results = relationship("QuizResult", back_populates="user")
 
-# --- BẢNG FOLDER ---
+#  BẢNG FOLDER 
 class Folder(Base):
     __tablename__ = "folders"
     id = Column(Integer, primary_key=True, index=True)
@@ -27,7 +27,7 @@ class Folder(Base):
     user = relationship("User", back_populates="folders")
     quizzes = relationship("Quiz", back_populates="folder")
 
-# --- BẢNG QUIZ ---
+#  BẢNG QUIZ 
 class Quiz(Base):
     __tablename__ = "quizzes"
     id = Column(Integer, primary_key=True, index=True)
@@ -45,7 +45,7 @@ class Quiz(Base):
     questions = relationship("Question", back_populates="quiz", cascade="all, delete-orphan")
     results = relationship("QuizResult", back_populates="quiz")
 
-# --- BẢNG QUESTION ---
+#  BẢNG QUESTION 
 class Question(Base):
     __tablename__ = "questions"
     id = Column(Integer, primary_key=True, index=True)
@@ -64,7 +64,7 @@ class Question(Base):
     quiz_id = Column(Integer, ForeignKey("quizzes.id"))
     quiz = relationship("Quiz", back_populates="questions")
 
-# --- BẢNG THỐNG KÊ CÂU HỎI ---
+#  BẢNG THỐNG KÊ CÂU HỎI 
 class UserQuestionStats(Base):
     __tablename__ = "user_question_stats"
     id = Column(Integer, primary_key=True, index=True)
@@ -77,7 +77,7 @@ class UserQuestionStats(Base):
     user = relationship("User", back_populates="question_stats")
     question = relationship("Question")
 
-# --- BẢNG LỊCH SỬ LÀM BÀI ---
+#  BẢNG LỊCH SỬ LÀM BÀI 
 class QuizResult(Base):
     __tablename__ = "quiz_results"
     id = Column(Integer, primary_key=True, index=True)

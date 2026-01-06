@@ -1,10 +1,8 @@
-// File này chỉ chạy trên trang login.html và register.html
-
 const loginForm = document.getElementById('login-form');
 const registerForm = document.getElementById('register-form');
 const authMessage = document.getElementById('auth-message');
 
-// === HÀM XỬ LÝ LỖI ĐĂNG NHẬP MỚI (Thân thiện) ===
+// HÀM XỬ LÝ LỖI ĐĂNG NHẬP 
 function handleAuthError(data) {
     authMessage.className = 'auth-message text-danger'; // Hiển thị màu đỏ
     
@@ -32,13 +30,13 @@ function handleAuthError(data) {
     }
 }
 
-// === HÀM HIỂN THỊ THÀNH CÔNG (Thân thiện) ===
+//  HÀM HIỂN THỊ THÀNH CÔNG 
 function handleAuthSuccess(message) {
     authMessage.className = 'auth-message text-success'; // Hiển thị màu xanh
     authMessage.innerText = message;
 }
 
-// -- Xử lý Đăng ký --
+//  Xử lý Đăng ký 
 if (registerForm) {
     registerForm.addEventListener('submit', async function(e) { // Chuyển sang async
         e.preventDefault();
@@ -113,7 +111,7 @@ if (loginForm) {
     });
 }
 
-// === ẨN / HIỆN MẬT KHẨU ===
+//  ẨN / HIỆN MẬT KHẨU 
 function togglePassword(inputId, toggleElement) {
     const input = document.getElementById(inputId);
     const isPassword = input.type === 'password';

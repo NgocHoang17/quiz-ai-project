@@ -42,7 +42,7 @@ const textTabButton = document.getElementById('text-tab');
 const quizCountInput = document.getElementById('quiz-count');
 const quizTypeSelect = document.getElementById('quiz-type');
 
-// ===  HÀM XỬ LÝ KÉO THẢ (DRAG & DROP) ===
+// HÀM XỬ LÝ KÉO THẢ (DRAG & DROP) 
 function setupDragAndDrop() {
     const uploadArea = document.querySelector('.upload-area');
     const fileInput = document.getElementById('file-input');
@@ -83,10 +83,9 @@ function setupDragAndDrop() {
         }
     }
 }
-// ==========================================
 
 
-// === NÚT TẠO QUIZ ===
+//  NÚT TẠO QUIZ 
 generateButton.addEventListener('click', function() {
     const numQuestions = parseInt(quizCountInput.value);
     const quizType = quizTypeSelect.value;
@@ -188,7 +187,7 @@ function displayQuiz(quizArray) {
     });
 }
 
-// === LOGIC LƯU QUIZ ===
+//  LOGIC LƯU QUIZ 
 saveQuizButton.addEventListener('click', async function() {
     if (!currentQuizData) { alert("Không có dữ liệu quiz!"); return; }
     

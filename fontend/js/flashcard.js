@@ -6,7 +6,7 @@ const backContent = document.getElementById('card-back-content');
 const quizTitleElem = document.getElementById('quiz-title');
 const counterElem = document.getElementById('card-counter');
 
-// === HÀM TIỆN ÍCH ===
+//  HÀM TIỆN ÍCH 
 function escapeHTML(str) {
     if (typeof str !== 'string') return '';
     return str.replace(/[&<>"']/g, function(m) {
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (!quizId) { alert("Không tìm thấy Quiz ID"); return; }
 
     // 3. Tải dữ liệu
-    await loadQuizData(quizId, token); // ✅ Gửi token qua
+    await loadQuizData(quizId, token); //  Gửi token qua
 
     // 4. Sự kiện Lật thẻ
     flashcard.addEventListener('click', function() {
@@ -61,7 +61,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 async function loadQuizData(id, token) {
     try {
-        // ✅ Sửa đường dẫn API thành /quizzes/ để khớp với Backend
         const response = await fetch(`http://127.0.0.1:8000/quizzes/${id}`, { 
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -88,7 +87,7 @@ async function loadQuizData(id, token) {
     }
 }
 
-// === CẬP NHẬT HÀM RENDER NÀY ĐỂ HIỂN THỊ 4 ĐÁP ÁN + GIẢI THÍCH ===
+// HÀM RENDER ĐỂ HIỂN THỊ 4 ĐÁP ÁN + GIẢI THÍCH 
 function renderCard() {
     const q = allQuestions[currentIndex];
     

@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('submit-btn').addEventListener('click', confirmSubmit);
 });
 
-// --- HÀM TIỆN ÍCH TRỘN MẢNG ---
+//  HÀM TIỆN ÍCH TRỘN MẢNG 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));

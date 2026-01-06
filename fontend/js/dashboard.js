@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setupStartModalLogic();
 });
 
-// === 1. HÀM TIỆN ÍCH: ĐỒNG BỘ HIỂN THỊ LOẠI ĐỀ ===
+// HÀM TIỆN ÍCH: ĐỒNG BỘ HIỂN THỊ LOẠI ĐỀ ===
 function getQuizTypeBadge(type) {
     // Chuẩn hóa input phòng trường hợp null/undefined
     const safeType = type ? type.toLowerCase() : 'mcq';
@@ -64,7 +64,7 @@ function getQuizTypeBadge(type) {
     return `<span class="badge ${badgeClass} px-3 py-2 rounded-pill fw-bold" style="font-size: 0.75rem;">${label}</span>`;
 }
 
-// === 2. CÁC HÀM TẢI DỮ LIỆU ===
+//  CÁC HÀM TẢI DỮ LIỆU 
 
 async function loadDashboardStats(token) {
     try {
@@ -137,7 +137,7 @@ async function loadHistory(token) {
     } catch (err) { console.error(err); }
 }
 
-// Tải Lịch sử tạo đề (Đã áp dụng getQuizTypeBadge)
+// Tải Lịch sử tạo đề 
 async function loadRecentCreated(token) {
     const tbody = document.getElementById('recent-created-list');
     try {
@@ -147,7 +147,7 @@ async function loadRecentCreated(token) {
         data.forEach(q => {
             const dateStr = new Date(q.created_at).toLocaleDateString('vi-VN');
 
-            // SỬ DỤNG HÀM ĐỒNG BỘ LOẠI ĐỀ TẠI ĐÂY
+            // SỬ DỤNG HÀM ĐỒNG BỘ LOẠI ĐỀ 
             const typeBadge = getQuizTypeBadge(q.quiz_type);
 
             tbody.innerHTML += `
@@ -162,7 +162,7 @@ async function loadRecentCreated(token) {
     } catch (err) { console.error(err); }
 }
 
-// Tải Đề yêu thích (Đã áp dụng getQuizTypeBadge)
+// Tải Đề yêu thích 
 async function loadFavorites(token) {
     const tbody = document.getElementById('favorites-list');
     try {
@@ -183,7 +183,7 @@ async function loadFavorites(token) {
             const jsSafeTitle = safeTitle.replace(/'/g, "\\'");
             const questionCount = q.questions ? q.questions.length : 0;
 
-            // SỬ DỤNG HÀM ĐỒNG BỘ LOẠI ĐỀ TẠI ĐÂY
+            // SỬ DỤNG HÀM ĐỒNG BỘ LOẠI ĐỀ 
             const typeBadge = getQuizTypeBadge(q.quiz_type);
 
             tbody.innerHTML += `

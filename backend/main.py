@@ -22,7 +22,7 @@ from dotenv import load_dotenv
 import os
 import json
 
-# --- TẢI BIẾN MÔI TRƯỜNG & CẤU HÌNH AI ---
+#  TẢI BIẾN MÔI TRƯỜNG & CẤU HÌNH AI 
 dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
 load_dotenv(dotenv_path=dotenv_path)
 
@@ -36,12 +36,12 @@ else:
     except Exception as e:
         print(f"❌ Lỗi khi cấu hình Google AI: {e}")
 
-# --- TẠO BẢNG TRONG DATABASE ---
+#  TẠO BẢNG TRONG DATABASE 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# --- CẤU HÌNH CORS ---
+#  CẤU HÌNH CORS 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -50,7 +50,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- HÀM PHỤ THUỘC (DEPENDENCIES) ---
+#  HÀM PHỤ THUỘC (DEPENDENCIES) 
 def get_db():
     db = SessionLocal()
     try:
@@ -72,7 +72,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise credentials_exception
     return user
 
-# --- API XÁC THỰC (ĐĂNG KÝ & ĐĂNG NHẬP) ---
+#  API XÁC THỰC (ĐĂNG KÝ & ĐĂNG NHẬP) 
 @app.post("/register", response_model=schemas.UserOut)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(models.User.email == user.email).first()
@@ -106,7 +106,7 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# --- HÀM LÕI AI ---
+#  HÀM LÕI AI 
 def _generate_quiz_from_text(text: str, num_questions: int, quiz_type: str):
     quiz_type_instructions = {
         "mcq": "Trắc nghiệm 4 lựa chọn (A, B, C, D).",
@@ -157,7 +157,7 @@ def _generate_quiz_from_text(text: str, num_questions: int, quiz_type: str):
         print(f" Lỗi khi gọi Gemini API: {e}")
         return None, f"Lỗi khi gọi Gemini API: {str(e)}"
 
-# --- API QUIZ (TẠO VÀ LƯU) ---
+#  API QUIZ (TẠO VÀ LƯU) 
 
 class QuizRequest(BaseModel):
     text: str
@@ -231,7 +231,7 @@ async def generate_quiz_from_file(
     return {"quiz_data": quiz_data}
 
 
-# --- API QUẢN LÝ QUIZ (LƯU, XEM, SỬA, XÓA) ---
+#  API QUẢN LÝ QUIZ (LƯU, XEM, SỬA, XÓA) 
 
 @app.post("/save-quiz", response_model=schemas.QuizOut)
 def save_quiz(
@@ -347,7 +347,7 @@ def get_quiz_details(
     return quiz
 
 
-# ===  API NHẬN KẾT QUẢ VÀ LƯU LỊCH SỬ ===
+#  API NHẬN KẾT QUẢ VÀ LƯU LỊCH SỬ 
 # Định nghĩa Model cho item trong list gửi lên (để tránh trùng tên với models.QuizResult)
 class QuizSubmissionItem(BaseModel):
     question_id: int
@@ -368,7 +368,7 @@ def submit_quiz_results(
     total_questions = len(results)
 
     try:
-        # 1. Cập nhật thống kê từng câu (Logic cũ)
+        # 1. Cập nhật thống kê từng câu 
         for result in results:
             if result.is_correct: 
                 correct_count += 1
@@ -415,7 +415,7 @@ def submit_quiz_results(
 
     return {"message": "Đã ghi nhận kết quả và lưu lịch sử."}
 
-# --- API STATS CHO CÂU HỎI HAY SAI (Dùng cho chế độ luyện tập) ---
+#  API STATS CHO CÂU HỎI HAY SAI (Dùng cho chế độ luyện tập) 
 class QuestionStatOut(BaseModel):
     question_id: int
     is_frequently_wrong: bool
@@ -443,7 +443,7 @@ def get_question_stats_for_quiz(
         )
     return result_list
 
-# ===  API DASHBOARD STATS  ===
+#  API DASHBOARD STATS  
 @app.get("/dashboard-stats")
 def get_dashboard_stats(
     db: Session = Depends(get_db),
@@ -471,7 +471,7 @@ def get_dashboard_stats(
         "total_favorites": total_favorites
     }
 
-# === API 5 QUIZ TẠO GẦN NHẤT (Dùng cho bảng 'Lịch sử tạo đề') ===
+# API 5 QUIZ TẠO GẦN NHẤT (Dùng cho bảng 'Lịch sử tạo đề') 
 @app.get("/recent-quizzes", response_model=List[schemas.QuizOut])
 def get_recent_quizzes(
     db: Session = Depends(get_db),
@@ -484,7 +484,7 @@ def get_recent_quizzes(
         .all()
     return recent_quizzes
 
-# ===  API 5 LỊCH SỬ LÀM BÀI GẦN NHẤT (MỚI) ===
+#  API 5 LỊCH SỬ LÀM BÀI GẦN NHẤT
 @app.get("/quiz-history")
 def get_quiz_history(
     limit: int = 5,
@@ -507,7 +507,7 @@ def get_quiz_history(
         })
     return history_list
 
-# ===  API DANH SÁCH YÊU THÍCH (MỚI) ===
+#  API DANH SÁCH YÊU THÍCH 
 @app.get("/favorite-quizzes", response_model=List[schemas.QuizOut])
 def get_favorite_quizzes(
     db: Session = Depends(get_db),
@@ -534,7 +534,7 @@ def toggle_favorite(
     db.commit()
     return {"id": quiz.id, "is_favorite": quiz.is_favorite}
 
-# === API QUẢN LÝ FOLDER ===
+# API QUẢN LÝ FOLDER 
 @app.post("/folders", response_model=schemas.FolderOut)
 def create_folder(
     folder: schemas.FolderCreate,
@@ -588,7 +588,7 @@ def move_quiz(
     return {"message": "Đã di chuyển quiz thành công"}
 
 
-# === API XUẤT QUIZ RA FILE WORD (.DOCX) ===
+#  API XUẤT QUIZ RA FILE WORD (.DOCX) - download quiz
 @app.get("/quizzes/{quiz_id}/export/docx")
 def export_quiz_docx(
     quiz_id: int,
@@ -646,7 +646,7 @@ def export_quiz_docx(
         headers={"Content-Disposition": f"attachment; filename*=utf-8''{encoded_filename}"}
     )
 
-# ===  API BIỂU ĐỒ HOẠT ĐỘNG  ===
+#   API BIỂU ĐỒ HOẠT ĐỘNG  
 @app.get("/activity-chart")
 def get_activity_chart_data(
     time_range: str = "week",

@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Load Data
     refreshData(token);
 
-    // --- EVENT LISTENERS CHO MODAL ---
+    //  EVENT LISTENERS CHO MODAL ---
     
     // 1. Ẩn/Hiện ô nhập phút khi chọn chế độ
     document.querySelectorAll('input[name="quizMode"]').forEach(radio => {
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('confirm-move-quiz').addEventListener('click', () => confirmMoveQuiz(token));
 });
 
-// === QUẢN LÝ DỮ LIỆU ===
+//  QUẢN LÝ DỮ LIỆU 
 async function refreshData(token) {
     document.getElementById('loading-indicator').style.display = 'block';
     try {
@@ -91,7 +91,7 @@ async function refreshData(token) {
     finally { document.getElementById('loading-indicator').style.display = 'none'; }
 }
 
-// === HIỂN THỊ GIAO DIỆN ===
+//  HIỂN THỊ GIAO DIỆN 
 function renderCurrentView() {
     const folderContainer = document.getElementById('folders-container');
     const quizContainer = document.getElementById('quiz-list-container');
@@ -185,7 +185,7 @@ function createQuizElement(quiz) {
     return quizItem;
 }
 
-// === CÁC CHỨC NĂNG API ===
+//  CÁC CHỨC NĂNG API 
 function switchFolder(folderId) { currentViewFolderId = folderId; renderCurrentView(); }
 
 async function createFolder(token) {
@@ -280,7 +280,7 @@ async function deleteQuiz(id) {
 
 function downloadDocx(quizId) { window.location.href = `http://127.0.0.1:8000/quizzes/${quizId}/export/docx`; }
 
-// ✅ MỚI THÊM: HÀM TOGGLE FAVORITE
+//  HÀM TOGGLE FAVORITE
 async function toggleFavorite(event, quizId) {
     event.stopPropagation(); // Ngăn click vào xem chi tiết
     const token = localStorage.getItem('quizAIToken');

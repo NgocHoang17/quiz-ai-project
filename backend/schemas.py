@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
 
-# --- Schemas cho Folder (MỚI) ---
+# Schemas cho Folder 
 class FolderBase(BaseModel):
     name: str
 
@@ -16,7 +16,7 @@ class FolderOut(FolderBase):
     class Config:
         from_attributes = True
 
-# --- Schemas cho Question ---
+#  Schemas cho Question 
 class QuestionBase(BaseModel):
     question_text: str
     choice_a: str
@@ -36,7 +36,7 @@ class QuestionOut(QuestionBase):
     class Config:
         from_attributes = True
 
-# --- Schemas cho Quiz  ---
+#  Schemas cho Quiz  
 class QuizBase(BaseModel):
     title: str
     folder_id: Optional[int] = None
@@ -49,13 +49,13 @@ class QuizOut(QuizBase):
     id: int
     created_at: datetime
     owner_id: int
-    is_favorite: bool = False #  Mới
+    is_favorite: bool = False 
     questions: List[QuestionOut] = [] 
     
     class Config:
         orm_mode = True
 
-# --- Schema Kết quả làm bài ---
+# Schema Kết quả làm bài 
 class QuizResultCreate(BaseModel):
     score: int
     total_questions: int
@@ -69,11 +69,11 @@ class QuizResultOut(BaseModel):
     class Config:
         orm_mode = True
 
-# --- Schema cho việc di chuyển Quiz (MỚI) ---
+#  Schema cho việc di chuyển Quiz 
 class MoveQuizSchema(BaseModel):
     folder_id: Optional[int] = None # Int là ID folder, None là ra thư mục gốc
 
-# --- Schemas cho User ---
+#  Schemas cho User 
 class UserCreate(BaseModel):
     email: str
     password: str = Field(..., min_length=6, max_length=72)
@@ -88,7 +88,7 @@ class UserOut(BaseModel):
     class Config:
         from_attributes = True
 
-# --- Schemas cho Token ---
+#  Schemas cho Token 
 class Token(BaseModel):
     access_token: str
     token_type: str

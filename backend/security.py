@@ -4,7 +4,7 @@ from typing import Optional
 from jose import JWTError, jwt
 from . import schemas
 
-# --- Cấu hình mã hóa Password ---
+#  Cấu hình mã hóa Password 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def _truncate_password(password: str) -> str:
